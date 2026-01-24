@@ -35,6 +35,20 @@
   padding: 12px 8px; cursor: pointer; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
 .liqui-action-tile:hover { border-color: rgba(0, 212, 255, 0.5); box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15); }
+.liqui-action-tile[disabled] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.liqui-action-tile[disabled]:hover {
+  border-color: rgba(30, 50, 80, 0.6);
+  box-shadow: none;
+}
+
+.liqui-panel.liqui-busy .liqui-status {
+  background: rgba(0, 212, 255, 0.14);
+  border-color: rgba(0, 212, 255, 0.45);
+}
 .liqui-action-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #00D4FF, #0088CC); }
 .liqui-action-icon svg { width: 18px; height: 18px; color: #fff; }
 .liqui-action-label { font-size: 11px; font-weight: 600; }
@@ -65,8 +79,16 @@
 #liqui-chat-input { flex: 1; border: 1px solid rgba(30, 50, 80, 0.5); border-radius: 8px; background: rgba(10, 18, 35, 0.8); color: #fff; padding: 10px 12px; font-size: 12px; outline: none; }
 #liqui-chat-input::placeholder { color: #5a6a88; }
 #liqui-chat-input:focus { border-color: rgba(0, 212, 255, 0.5); }
+#liqui-chat-input[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
 #liqui-chat-send { width: 36px; height: 36px; border: none; border-radius: 8px; background: linear-gradient(135deg, #0066FF, #00D4FF); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 #liqui-chat-send svg { width: 16px; height: 16px; }
+#liqui-chat-send[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
 
 .liqui-selection-overlay { position: fixed; top: 0; left: 0; right: 320px; bottom: 0; background: rgba(0,0,0,0.3); cursor: crosshair; z-index: 2147483646; }
 .liqui-selection-box { position: fixed; border: 2px dashed #00D4FF; background: rgba(0, 212, 255, 0.1); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
