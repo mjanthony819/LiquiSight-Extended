@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart3, History, Zap, ChevronRight, Sparkles, LogOut } from 'lucide-react'
+import { BarChart3, History, Zap, ChevronRight, Sparkles, User, Wallet } from 'lucide-react'
 
 interface SidebarProps {
   currentPage: string
@@ -9,8 +9,12 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ currentPage, onNavigate, onLogout }: SidebarProps) {
+  // Default user for demo
+  const user = { name: 'Demo User', email: 'demo@liquisight.com', image: null }
+
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'portfolio', label: 'Portfolio', icon: Wallet },
     { id: 'history', label: 'Scan History', icon: History },
   ]
 
@@ -74,18 +78,39 @@ export default function Sidebar({ currentPage, onNavigate, onLogout }: SidebarPr
         </button>
       </div>
 
-      {/* Footer */}
+      {/* User Profile Section */}
       <div className="relative p-4 border-t border-sidebar-border/50">
-        {/* Logout Button */}
-        {onLogout && (
-          <button
-            onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/10 rounded-xl transition-all text-sm"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </button>
-        )}
+        <button
+          onClick={() => onNavigate('profile')}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+            currentPage === 'profile'
+              ? 'bg-primary/10 border border-primary/20'
+              : 'hover:bg-sidebar-accent/10'
+          }`}
+        >
+          <div className="w-9 h-9 rounded-lg overflow-hidden bg-muted border border-border/50 flex-shrink-0">
+            {user?.image ? (
+              <img
+                src={user.image}
+                alt={user.name || 'Profile'}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary/70">
+                <User className="w-4 h-4 text-primary-foreground" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-sm font-medium text-sidebar-foreground truncate">
+              {user?.name || 'User'}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {user?.email || 'View profile'}
+            </p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        </button>
       </div>
     </div>
   )

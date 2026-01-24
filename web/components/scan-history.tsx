@@ -1,74 +1,41 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, AlertCircle, BarChart3, Sparkles, Search, Loader2, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { TrendingUp, TrendingDown, BarChart3, Sparkles, Search, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { deleteScan, fetchLatestScans, ScanRecord } from '@/lib/analyze'
-import { emitScansUpdated, onScansUpdated } from '@/lib/scans-events'
+import { useScans } from '@/context/scans-context'
 
 export default function ScanHistory() {
-  const [scans, setScans] = useState<ScanRecord[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [loadError, setLoadError] = useState(false)
+  const { scans, removeScan } = useScans()
   const [query, setQuery] = useState('')
   const [deleteError, setDeleteError] = useState<string | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-
-  useEffect(() => {
-    async function loadScans() {
-      setIsLoading(true)
-      setLoadError(false)
-      try {
-        const data = await fetchLatestScans(50)
-        setScans(data)
-      } catch (err) {
-        console.error('Failed to load scans:', err)
-        setLoadError(true)
-      }
-      setIsLoading(false)
-    }
-    loadScans()
-
-    const unsubscribe = onScansUpdated(() => {
-      loadScans()
-    })
-
-    return () => unsubscribe()
-  }, [])
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    const diffHours = Math.floor(diffMs / 3600000)
-    const diffDays = Math.floor(diffMs / 86400000)
-
-    if (diffMins < 1) return 'just now'
-    if (diffMins < 60) return `${diffMins} min ago`
-    if (diffHours < 24) return `${diffHours} hours ago`
-    return `${diffDays} days ago`
-  }
 
   const getTrendIcon = (trend: string) => {
-    if (trend === 'Uptrend') {
+    if (trend === 'up') {
       return <TrendingUp className="w-4 h-4 text-success" />
     }
-    if (trend === 'Downtrend') {
+    if (trend === 'down') {
       return <TrendingDown className="w-4 h-4 text-destructive" />
     }
     return <BarChart3 className="w-4 h-4 text-muted-foreground" />
   }
 
+  const getTrendLabel = (trend: string) => {
+    if (trend === 'up') return 'Uptrend'
+    if (trend === 'down') return 'Downtrend'
+    return 'Sideways'
+  }
+
   const getRiskBadge = (risk: string) => {
     const colors = {
-      Low: 'bg-success/10 text-success border-success/20',
-      Medium: 'bg-accent/10 text-accent border-accent/20',
-      High: 'bg-destructive/10 text-destructive border-destructive/20',
+      low: 'bg-success/10 text-success border-success/20',
+      medium: 'bg-accent/10 text-accent border-accent/20',
+      high: 'bg-destructive/10 text-destructive border-destructive/20',
     }
+    const label = risk.charAt(0).toUpperCase() + risk.slice(1)
     return (
-      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${colors[risk as keyof typeof colors] || colors.Medium}`}>
-        {risk} Risk
+      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${colors[risk as keyof typeof colors] || colors.medium}`}>
+        {label} Risk
       </div>
     )
   }
@@ -77,36 +44,21 @@ export default function ScanHistory() {
   const avgConfidence =
     totalScans === 0
       ? 0
-      : (scans.reduce((sum, s) => sum + s.confidence, 0) / totalScans) * 100
+      : scans.reduce((sum, s) => sum + s.confidence, 0) / totalScans
 
   const normalizedQuery = query.trim().toLowerCase()
   const filteredScans = normalizedQuery
     ? scans.filter((scan) => {
-        const haystack = `${scan.stock_name} ${scan.trend} ${scan.risk} ${scan.explanation}`.toLowerCase()
+        const haystack = `${scan.symbol} ${scan.name} ${scan.trend} ${scan.riskLevel} ${scan.explanation}`.toLowerCase()
         return haystack.includes(normalizedQuery)
       })
     : scans
 
-  async function handleDelete(scan: ScanRecord) {
+  function handleDelete(id: string, name: string) {
     setDeleteError(null)
-
-    const confirmed = window.confirm(`Delete scan for "${scan.stock_name}"? This cannot be undone.`)
+    const confirmed = window.confirm(`Delete scan for "${name}"? This cannot be undone.`)
     if (!confirmed) return
-
-    setDeletingId(scan.id)
-    try {
-      const res = await deleteScan(scan.id)
-      if (!res.ok) {
-        setDeleteError(res.error ?? 'Failed to delete scan')
-        return
-      }
-
-      // Optimistic UI update + refresh other views
-      setScans((prev) => prev.filter((s) => s.id !== scan.id))
-      emitScansUpdated()
-    } finally {
-      setDeletingId(null)
-    }
+    removeScan(id)
   }
 
   return (
@@ -212,17 +164,7 @@ export default function ScanHistory() {
 
         {/* Scan Cards */}
         <div className="space-y-3">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-primary animate-spin" />
-            </div>
-          ) : loadError ? (
-            <Card className="bg-card border border-border/50 p-12 text-center">
-              <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-card-foreground mb-2">Unable to load scans</h3>
-              <p className="text-muted-foreground">Database connection unavailable. Scans will be stored locally.</p>
-            </Card>
-          ) : filteredScans.length === 0 ? (
+          {filteredScans.length === 0 ? (
             <Card className="bg-card border border-border/50 p-12 text-center">
               <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-card-foreground mb-2">No matching scans</h3>
@@ -239,14 +181,15 @@ export default function ScanHistory() {
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <span className="text-sm font-bold text-primary">{scan.symbol}</span>
                         <h3 className="text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">
-                          {scan.stock_name}
+                          {scan.name}
                         </h3>
-                        {getRiskBadge(scan.risk)}
+                        {getRiskBadge(scan.riskLevel)}
                         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                           {getTrendIcon(scan.trend)}
-                          {scan.trend}
+                          {getTrendLabel(scan.trend)}
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2">{scan.explanation}</p>
@@ -255,17 +198,16 @@ export default function ScanHistory() {
                       <div className="flex items-center justify-end gap-2 mb-2">
                         <button
                           type="button"
-                          onClick={() => handleDelete(scan)}
-                          disabled={deletingId === scan.id}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/20 px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/5 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                          aria-label={`Delete scan for ${scan.stock_name}`}
+                          onClick={() => handleDelete(scan.id, scan.name)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/20 px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/5 transition"
+                          aria-label={`Delete scan for ${scan.name}`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                          {deletingId === scan.id ? 'Deleting…' : 'Delete'}
+                          Delete
                         </button>
                       </div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Confidence</p>
-                      <p className="text-2xl font-bold text-primary">{Math.round(scan.confidence * 100)}%</p>
+                      <p className="text-2xl font-bold text-primary">{scan.confidence}%</p>
                     </div>
                   </div>
 
@@ -273,11 +215,11 @@ export default function ScanHistory() {
                     <div className="flex items-center gap-6">
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">Trend</p>
-                        <p className="font-semibold text-card-foreground">{scan.trend}</p>
+                        <p className="font-semibold text-card-foreground">{getTrendLabel(scan.trend)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">Timestamp</p>
-                        <p className="font-semibold text-card-foreground">{formatDate(scan.created_at)}</p>
+                        <p className="font-semibold text-card-foreground">{scan.timestamp}</p>
                       </div>
                     </div>
                   </div>

@@ -6,18 +6,20 @@ import Sidebar from '@/components/sidebar'
 import Dashboard from '@/components/dashboard'
 import ScanHistory from '@/components/scan-history'
 import NewScan from '@/components/new-scan'
+import Profile from '@/components/profile'
 import LandingPage from '@/components/landing-page'
+import Portfolio from '@/components/portfolio'
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentPage, setCurrentPage] = useState('dashboard')
 
   const handleLogin = () => {
-    setIsAuthenticated(true)
+    setIsLoggedIn(true)
   }
 
   const handleLogout = () => {
-    setIsAuthenticated(false)
+    setIsLoggedIn(false)
     setCurrentPage('dashboard')
   }
 
@@ -27,6 +29,10 @@ export default function Home() {
         return <ScanHistory />
       case 'new-scan':
         return <NewScan onBack={() => setCurrentPage('dashboard')} />
+      case 'profile':
+        return <Profile />
+      case 'portfolio':
+        return <Portfolio />
       default:
         return (
           <Dashboard
@@ -36,8 +42,8 @@ export default function Home() {
     }
   }
 
-  // Show landing page if not authenticated
-  if (!isAuthenticated) {
+  // Show landing page if not logged in
+  if (!isLoggedIn) {
     return <LandingPage onLogin={handleLogin} />
   }
 
