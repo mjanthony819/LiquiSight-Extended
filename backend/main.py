@@ -1,7 +1,12 @@
-from fastapi import FastAPI, File, Form, UploadFile
+import io
+
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
+from PIL import Image
+
+from chart_analyzer import analyze_chart
 
 app = FastAPI(title="LiquiSight API", version="1.0.0")
 
@@ -34,12 +39,16 @@ async def analyze(
     - **image**: Optional chart image file
     - **stock_name**: Optional stock ticker symbol
     
-    Returns a fixed response per the locked API contract.
+    Returns analysis result per the locked API contract.
     """
-    return AnalysisResponse(
-        stock_name="AAPL",
-        trend="Uptrend",
-        risk="Medium",
-        confidence=0.76,
-        explanation="The chart shows higher highs with increasing volatility, indicating an uptrend with moderate risk of pullback.",
-    )
+    if image is None:
+        raise HTTPException(status_code=400, detail="Image file is required")
+    
+    # Read and convert uploaded file to PIL Image
+    contents = await image.read()
+    pil_image = Image.open(io.BytesIO(contents))
+    
+    # Analyze the chart using the AI analyzer
+    result = analyze_chart(pil_image, stock_name=stock_name)
+    
+    return AnalysisResponse(**result)
