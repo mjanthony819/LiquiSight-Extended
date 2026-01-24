@@ -1,0 +1,2 @@
+# LiquiSight
+Visual Finance Copilot
