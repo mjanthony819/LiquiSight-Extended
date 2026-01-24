@@ -7,6 +7,7 @@ import Sidebar from '@/components/sidebar'
 import Dashboard from '@/components/dashboard'
 import ScanHistory from '@/components/scan-history'
 import NewScan from '@/components/new-scan'
+import Profile from '@/components/profile'
 import LandingPage from '@/components/landing-page'
 
 export default function Home() {
@@ -27,6 +28,8 @@ export default function Home() {
         return <ScanHistory />
       case 'new-scan':
         return <NewScan onBack={() => setCurrentPage('dashboard')} />
+      case 'profile':
+        return <Profile />
       default:
         return (
           <Dashboard
