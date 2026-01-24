@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, Clock, ChevronRight } from 'lucide-react'
+import { TrendingUp, TrendingDown, Clock, ChevronRight, Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { useScans } from '@/context/scans-context'
 
@@ -18,9 +18,9 @@ function getRiskColor(risk: string) {
 }
 
 function getConfidenceColor(confidence: number) {
-  if (confidence >= 90) return 'bg-success/10 text-success'
-  if (confidence >= 80) return 'bg-primary/10 text-primary'
-  return 'bg-warning/10 text-warning'
+  if (confidence >= 90) return 'bg-success/10 text-success border border-success/20'
+  if (confidence >= 80) return 'bg-primary/10 text-primary border border-primary/20'
+  return 'bg-warning/10 text-warning border border-warning/20'
 }
 
 interface RecentScansProps {
@@ -33,14 +33,26 @@ export default function RecentScans({ onScanClick, maxItems = 6 }: RecentScansPr
   const displayedScans = scans.slice(0, maxItems)
 
   return (
-    <Card className="bg-card border border-border">
-      <div className="p-6 border-b border-border">
-        <h2 className="text-lg font-semibold text-card-foreground">Recent AI Scans</h2>
-        <p className="text-sm text-muted-foreground mt-1">Latest financial analysis results</p>
+    <Card className="bg-card border border-border/50 overflow-hidden">
+      <div className="p-6 border-b border-border/50 bg-gradient-to-r from-accent/5 to-transparent">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center ring-1 ring-accent/20">
+              <Sparkles className="w-5 h-5 text-accent" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-card-foreground">Recent AI Scans</h2>
+              <p className="text-sm text-muted-foreground">Latest financial analysis results</p>
+            </div>
+          </div>
+          <div className="px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-lg">
+            <span className="text-xs font-semibold text-accent">{scans.length} Total</span>
+          </div>
+        </div>
       </div>
 
-      <div className="divide-y divide-border">
-        {displayedScans.map((scan) => {
+      <div className="divide-y divide-border/30">
+        {displayedScans.map((scan, index) => {
           const TrendIcon = scan.trend === 'up' ? TrendingUp : TrendingDown
           const trendColor = scan.trend === 'up' ? 'text-success' : 'text-destructive'
 
@@ -48,42 +60,43 @@ export default function RecentScans({ onScanClick, maxItems = 6 }: RecentScansPr
             <button
               key={scan.id}
               onClick={() => onScanClick?.(scan.symbol)}
-              className="w-full p-4 hover:bg-secondary/5 transition-colors text-left group"
+              className="w-full p-4 hover:bg-muted/20 transition-all duration-200 text-left group"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center justify-between gap-4">
                 {/* Left: Stock Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div>
-                      <p className="font-semibold text-card-foreground group-hover:text-primary transition">{scan.symbol}</p>
-                      <p className="text-sm text-muted-foreground truncate">{scan.name}</p>
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-1 ring-primary/20 flex-shrink-0">
+                    <span className="text-xs font-bold text-primary">{scan.symbol.slice(0, 2)}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-card-foreground group-hover:text-primary transition-colors">{scan.symbol}</p>
+                      <div className={`${trendColor} flex items-center gap-1`}>
+                        <TrendIcon className="w-3.5 h-3.5" />
+                        <span className="text-xs font-medium">{scan.trendPercent}</span>
+                      </div>
                     </div>
-                    <div className={`${trendColor}`}>
-                      <TrendIcon className="w-4 h-4" />
-                    </div>
+                    <p className="text-sm text-muted-foreground truncate">{scan.name}</p>
                   </div>
                 </div>
 
                 {/* Middle: Risk & Confidence */}
-                <div className="flex items-center gap-3">
-                  {/* Risk Badge */}
-                  <div
-                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getRiskColor(scan.riskLevel)}`}
-                  >
-                    {scan.riskLevel.charAt(0).toUpperCase() + scan.riskLevel.slice(1)} Risk
+                <div className="hidden md:flex items-center gap-2">
+                  <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap ${getRiskColor(scan.riskLevel)}`}>
+                    {scan.riskLevel.charAt(0).toUpperCase() + scan.riskLevel.slice(1)}
                   </div>
-
-                  {/* Confidence Score */}
-                  <div className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getConfidenceColor(scan.confidence)}`}>
+                  <div className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap ${getConfidenceColor(scan.confidence)}`}>
                     {scan.confidence}%
                   </div>
                 </div>
 
                 {/* Right: Timestamp & Arrow */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground whitespace-nowrap">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>{scan.timestamp}</span>
-                  <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition" />
+                <div className="flex items-center gap-3 text-xs text-muted-foreground whitespace-nowrap">
+                  <div className="hidden sm:flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{scan.timestamp}</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                 </div>
               </div>
             </button>
@@ -92,9 +105,10 @@ export default function RecentScans({ onScanClick, maxItems = 6 }: RecentScansPr
       </div>
 
       {/* View All Link */}
-      <div className="p-4 border-t border-border bg-secondary/5 text-center">
-        <button className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-          View all scans →
+      <div className="p-4 border-t border-border/30 bg-muted/10">
+        <button className="w-full py-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-2 group">
+          <span>View all scans</span>
+          <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
         </button>
       </div>
     </Card>

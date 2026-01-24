@@ -3,7 +3,7 @@
 import React from "react"
 
 import { useState, useRef } from 'react'
-import { Upload, Zap, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
+import { Upload, Zap, ArrowRight, AlertCircle, Loader2, ArrowLeft, Sparkles, CheckCircle2, Image as ImageIcon } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { useScans } from '@/context/scans-context'
 
@@ -71,19 +71,20 @@ export default function NewScan({ onBack }: NewScanProps) {
 
   if (showSuccess) {
     return (
-      <div className="flex-1 bg-background p-8 flex items-center justify-center">
+      <div className="flex-1 bg-background min-h-screen flex items-center justify-center p-8">
         <div className="text-center max-w-md">
-          <div className="mb-6 flex justify-center">
-            <div className="w-16 h-16 rounded-full bg-success/10 border-2 border-success flex items-center justify-center animate-scale-pulse">
-              <svg className="w-8 h-8 text-success" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+          <div className="mb-8 flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-success/30 rounded-full blur-xl animate-pulse" />
+              <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-success to-success/70 flex items-center justify-center shadow-2xl shadow-success/30">
+                <CheckCircle2 className="w-10 h-10 text-white" />
+              </div>
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-foreground mb-2">Scan Complete!</h2>
-          <p className="text-muted-foreground mb-6">Your analysis has been added to the dashboard and portfolio. Redirecting...</p>
-          <div className="w-full h-1 bg-border rounded-full overflow-hidden">
-            <div className="h-full bg-primary animate-pulse" style={{ animation: 'width 2s ease-in-out' }} />
+          <h2 className="text-3xl font-bold text-foreground mb-3 tracking-tight">Scan Complete!</h2>
+          <p className="text-muted-foreground mb-8 leading-relaxed">Your analysis has been added to the dashboard and portfolio. Redirecting...</p>
+          <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-success to-accent rounded-full animate-pulse" style={{ width: '100%' }} />
           </div>
         </div>
       </div>
@@ -91,119 +92,149 @@ export default function NewScan({ onBack }: NewScanProps) {
   }
 
   return (
-    <div className="flex-1 bg-background p-8">
-      {/* Header with Back Button */}
-      <div className="mb-12">
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="text-primary hover:text-primary/80 text-sm font-medium mb-4 flex items-center gap-1"
-          >
-            ← Back to Dashboard
-          </button>
-        )}
-        <h1 className="text-4xl font-bold text-foreground mb-2">AI Copilot Control Center</h1>
-        <p className="text-muted-foreground">Choose how you want to analyze your stock charts</p>
-      </div>
-
-      {/* SECTION 1: COPILOT MODE (PRIMARY) */}
-      <div className="mb-16">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Scan with Copilot (Browser Extension)</h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            Use our browser extension to scan any stock chart directly from your screen. Results will automatically appear in your portfolio.
-          </p>
-        </div>
-
-        {/* Large Copilot Card */}
-        <div className="relative">
-          {/* Background gradient effect */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-primary/10 to-accent/20 rounded-2xl blur-2xl opacity-40" />
-          
-          <Card className="relative bg-gradient-to-br from-card to-card/80 border border-primary/30 hover:border-primary/50 transition-all overflow-hidden">
-            {/* Animated background elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -mr-48 -mt-48" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent/10 rounded-full blur-3xl -ml-40 -mb-40" />
-
-            <div className="relative p-12 text-center">
-              {/* Status indicator */}
-              <div className="mb-6 flex justify-center">
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg animate-pulse" />
-                  <div className="relative w-16 h-16 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center">
-                    {isWaiting ? (
-                      <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-                    ) : (
-                      <Zap className="w-8 h-8 text-primary" />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Main text */}
-              <h3 className="text-3xl font-bold text-foreground mb-3">
-                {isWaiting ? 'Waiting for Copilot Scan...' : 'Copilot Ready'}
-              </h3>
-              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                {isWaiting
-                  ? 'Open the LiquiSight browser extension and select any stock chart to analyze it instantly.'
-                  : 'Your copilot is active and monitoring your browser for chart scans.'}
-              </p>
-
-              {/* Primary CTA */}
-              <button className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold rounded-lg transition-all hover:shadow-lg hover:shadow-primary/25">
-                <Zap className="w-5 h-5" />
-                Open Extension
-              </button>
-
-              {/* Status text */}
-              <p className="text-xs text-muted-foreground mt-6">
-                {isWaiting
-                  ? '⏳ Listening for scans... Make sure the extension is installed'
-                  : '✓ Extension is active and monitoring'}
-              </p>
+    <div className="flex-1 bg-background min-h-screen">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden border-b border-border/50">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-48 -mt-48" />
+        
+        <div className="relative px-8 py-10">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="group flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium mb-6 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              Back to Dashboard
+            </button>
+          )}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25">
+              <Sparkles className="w-6 h-6 text-primary-foreground" />
             </div>
-          </Card>
-        </div>
-
-        {/* Info box below copilot */}
-        <div className="mt-6 p-4 bg-primary/5 border border-primary/20 rounded-lg flex items-start gap-3">
-          <Zap className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm text-foreground font-medium">Fastest Way to Analyze</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              The copilot extension enables instant chart recognition and analysis without leaving your browser.
-            </p>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">AI Scan Center</h1>
+              <p className="text-muted-foreground">Choose your analysis method</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="flex items-center gap-4 mb-16">
-        <div className="flex-1 h-px bg-border" />
-        <span className="text-xs text-muted-foreground uppercase font-semibold">or</span>
-        <div className="flex-1 h-px bg-border" />
-      </div>
+      <div className="p-8 max-w-6xl mx-auto space-y-12">
+        {/* SECTION 1: COPILOT MODE (PRIMARY) */}
+        <div>
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                <span className="text-xs font-bold text-primary">1</span>
+              </div>
+              <h2 className="text-xl font-bold text-foreground">Browser Extension Scan</h2>
+              <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-semibold rounded-full">Recommended</span>
+            </div>
+            <p className="text-muted-foreground text-sm ml-8">
+              Use our browser extension to scan any stock chart directly from your screen.
+            </p>
+          </div>
 
-      {/* SECTION 2: MANUAL SCAN DEMO MODE (SECONDARY) */}
-      <div>
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Manual Scan (Demo Mode)</h2>
-          <p className="text-muted-foreground text-sm mt-1">
-            Fallback option: Upload a stock chart image manually for analysis
-          </p>
+          {/* Large Copilot Card */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-accent/10 rounded-2xl blur-2xl opacity-50" />
+            
+            <Card className="relative bg-gradient-to-br from-card via-card to-card/80 border border-primary/30 hover:border-primary/50 transition-all duration-300 overflow-hidden">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-[100px] -mr-40 -mt-40" />
+              <div className="absolute bottom-0 left-0 w-60 h-60 bg-accent/10 rounded-full blur-[80px] -ml-30 -mb-30" />
+
+              <div className="relative p-10 text-center">
+                {/* Status indicator */}
+                <div className="mb-8 flex justify-center">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg animate-pulse" />
+                    <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/40 flex items-center justify-center">
+                      {isWaiting ? (
+                        <div className="w-10 h-10 rounded-full border-3 border-primary/30 border-t-primary animate-spin" />
+                      ) : (
+                        <Zap className="w-10 h-10 text-primary" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight">
+                  {isWaiting ? 'Waiting for Copilot...' : 'Copilot Ready'}
+                </h3>
+                <p className="text-muted-foreground mb-8 max-w-lg mx-auto leading-relaxed">
+                  {isWaiting
+                    ? 'Open the LiquiSight browser extension and select any stock chart to analyze it instantly.'
+                    : 'Your copilot is active and monitoring your browser for chart scans.'}
+                </p>
+
+                <button className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-primary/25 hover:scale-[1.02]">
+                  <Zap className="w-5 h-5" />
+                  Open Extension
+                </button>
+
+                <p className="text-xs text-muted-foreground mt-6 flex items-center justify-center gap-2">
+                  {isWaiting ? (
+                    <>
+                      <span className="w-2 h-2 rounded-full bg-warning animate-pulse" />
+                      Listening for scans... Make sure the extension is installed
+                    </>
+                  ) : (
+                    <>
+                      <span className="w-2 h-2 rounded-full bg-success" />
+                      Extension is active and monitoring
+                    </>
+                  )}
+                </p>
+              </div>
+            </Card>
+          </div>
+
+          {/* Info box */}
+          <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Zap className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-foreground font-semibold">Fastest Way to Analyze</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                The copilot extension enables instant chart recognition and analysis without leaving your browser.
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl">
-          {/* Image Upload Field */}
-          <div>
-            <Card className="bg-card border-2 border-dashed border-border hover:border-primary/50 transition-all h-full">
+        {/* Divider */}
+        <div className="flex items-center gap-6">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider px-4 py-2 bg-muted/30 rounded-full">or</span>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+        </div>
+
+        {/* SECTION 2: MANUAL SCAN */}
+        <div>
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
+                <span className="text-xs font-bold text-muted-foreground">2</span>
+              </div>
+              <h2 className="text-xl font-bold text-foreground">Manual Upload</h2>
+              <span className="px-2 py-0.5 bg-muted text-muted-foreground text-xs font-semibold rounded-full">Demo Mode</span>
+            </div>
+            <p className="text-muted-foreground text-sm ml-8">
+              Upload a stock chart image manually for analysis
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Image Upload Field */}
+            <Card className="bg-card border-2 border-dashed border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group">
               <div className="p-8 text-center">
-                <div className="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                  <Upload className="w-6 h-6 text-muted-foreground" />
+                <div className="w-14 h-14 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/10 transition-colors">
+                  <ImageIcon className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">Upload Chart Image</h3>
-                <p className="text-xs text-muted-foreground mb-6">
+                <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
                   Drag and drop or click to select a stock chart image (PNG, JPG)
                 </p>
 
@@ -212,14 +243,14 @@ export default function NewScan({ onBack }: NewScanProps) {
                     <img
                       src={uploadedImage || "/placeholder.svg"}
                       alt="Uploaded chart"
-                      className="w-full h-48 object-cover rounded-lg border border-border mb-3"
+                      className="w-full h-48 object-cover rounded-xl border border-border mb-3"
                     />
                     <button
                       onClick={() => {
                         setUploadedImage(null)
                         if (fileInputRef.current) fileInputRef.current.value = ''
                       }}
-                      className="text-xs text-primary hover:underline"
+                      className="text-xs text-primary hover:underline font-medium"
                     >
                       Clear image
                     </button>
@@ -227,7 +258,7 @@ export default function NewScan({ onBack }: NewScanProps) {
                 ) : (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-block px-6 py-2 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition mb-3"
+                    className="inline-block px-6 py-2.5 bg-primary/10 text-primary font-semibold rounded-xl hover:bg-primary/20 transition-colors"
                   >
                     Choose File
                   </button>
@@ -242,56 +273,57 @@ export default function NewScan({ onBack }: NewScanProps) {
                 />
               </div>
             </Card>
-          </div>
 
-          {/* Stock Name & Analyze */}
-          <div className="flex flex-col">
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-foreground mb-3">Stock Name or Symbol</label>
-              <input
-                type="text"
-                placeholder="e.g., AAPL, Apple Inc., TSLA"
-                value={stockName}
-                onChange={(e) => setStockName(e.target.value)}
-                className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
-              />
-              <p className="text-xs text-muted-foreground mt-2">Enter the stock ticker or company name</p>
+            {/* Stock Name & Analyze */}
+            <div className="flex flex-col">
+              <Card className="bg-card border border-border p-6 flex-1">
+                <label className="block text-sm font-semibold text-foreground mb-3">Stock Name or Symbol</label>
+                <input
+                  type="text"
+                  placeholder="e.g., AAPL, Apple Inc., TSLA"
+                  value={stockName}
+                  onChange={(e) => setStockName(e.target.value)}
+                  className="w-full px-4 py-3.5 bg-input border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                />
+                <p className="text-xs text-muted-foreground mt-2">Enter the stock ticker or company name</p>
+
+                <button
+                  onClick={handleAnalyze}
+                  disabled={!stockName || !uploadedImage || isAnalyzing}
+                  className="mt-6 w-full px-6 py-3.5 bg-gradient-to-r from-muted to-muted/80 hover:from-primary hover:to-primary/80 text-foreground hover:text-primary-foreground font-semibold rounded-xl border border-border hover:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      Analyze Chart
+                      <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+
+                <p className="text-xs text-muted-foreground text-center mt-4">
+                  Demo mode — For production, use the browser extension
+                </p>
+              </Card>
             </div>
-
-            {/* Analyze Button */}
-            <button
-              onClick={handleAnalyze}
-              disabled={!stockName || !uploadedImage || isAnalyzing}
-              className="mt-auto px-6 py-3 bg-secondary text-foreground font-semibold rounded-lg border border-border hover:border-primary/50 hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
-            >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  Analyze Chart
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              This mode is for demo purposes. For production analysis, use the Copilot extension above.
-            </p>
           </div>
         </div>
-      </div>
 
-      {/* Disclaimer */}
-      <div className="mt-12 p-4 bg-accent/5 border border-accent/20 rounded-lg flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm text-foreground font-medium">AI Analysis Disclaimer</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            LiquiSight provides technical analysis and market insights for informational purposes. Always conduct your own research and consult with a financial advisor before making investment decisions.
-          </p>
+        {/* Disclaimer */}
+        <div className="p-5 bg-accent/5 border border-accent/20 rounded-xl flex items-start gap-4">
+          <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+            <AlertCircle className="w-5 h-5 text-accent" />
+          </div>
+          <div>
+            <p className="text-sm text-foreground font-semibold">AI Analysis Disclaimer</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              LiquiSight provides technical analysis and market insights for informational purposes. Always conduct your own research and consult with a financial advisor before making investment decisions.
+            </p>
+          </div>
         </div>
       </div>
     </div>
