@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { X, Zap, Mail, ArrowRight, Loader2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { signIn } from 'next-auth/react'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -33,9 +34,14 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
 
   const handleGoogleLogin = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setIsLoading(false)
-    onLogin()
+    // Use NextAuth.js to sign in with Google
+    await signIn('google', { callbackUrl: '/' })
+  }
+
+  const handleGitHubLogin = async () => {
+    setIsLoading(true)
+    // Use NextAuth.js to sign in with GitHub
+    await signIn('github', { callbackUrl: '/' })
   }
 
   // Theme-aware styles
