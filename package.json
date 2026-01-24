@@ -19,12 +19,9 @@
   },
   "homepage": "https://github.com/Adichapati/LiquiSight#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.91.1",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "next-auth": "^4.24.13",
-    "node-fetch": "^3.3.2",
-    "uvicorn": "^0.0.1-security"
+    "node-fetch": "^3.3.2"
   }
 }
