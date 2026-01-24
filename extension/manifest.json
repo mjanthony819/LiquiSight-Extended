@@ -1,40 +1,38 @@
 {
   "manifest_version": 3,
-  "name": "LiquiSight - AI Financial Copilot",
-  "version": "1.0.0",
-  "description": "AI-powered visual financial intelligence that analyzes stocks in real-time",
+  "name": "LiquiSight",
+  "version": "1.0",
+  "description": "AI Copilot for Visual Financial Intelligence",
   "permissions": [
     "activeTab",
     "storage",
-    "tabs",
-    "scripting"
+    "scripting",
+    "tabs"
   ],
   "host_permissions": [
-    "https://*.tradingview.com/*",
-    "https://*.yahoo.com/*",
-    "https://*.google.com/finance/*",
-    "https://*.investing.com/*",
-    "https://*.bloomberg.com/*",
     "<all_urls>"
   ],
-  "action": {
-    "default_popup": "popup/popup.html"
-  },
   "background": {
-    "service_worker": "background/background.js"
+    "service_worker": "background.js"
   },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Open LiquiSight"
+  },
+  "commands": {
+    "toggle-liquisight": {
+      "suggested_key": {
+        "default": "Alt+L"
+      },
+      "description": "Toggle LiquiSight side panel on current page"
+    }
+  },
+  
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "css": ["content/style.css"],
-      "js": ["content/content.js"],
-      "run_at": "document_end"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["assets/*", "content/*"],
-      "matches": ["<all_urls>"]
+      "js": ["content/content.js"]
     }
   ]
 }

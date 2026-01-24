@@ -1,29 +1,17 @@
-// LiquiSight Background Service Worker
+// background/background.js
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === 'captureScreen') {
-    chrome.tabs.captureVisibleTab(null, { format: 'png' }, (dataUrl) => {
-      sendResponse({ dataUrl });
-    });
-    return true; // Keep message channel open for async response
-  }
+// Click on extension icon -> toggle LiquiSight side panel on current tab
+chrome.action.onClicked.addListener((tab) => {
+  if (!tab.id) return;
+  chrome.tabs.sendMessage(tab.id, { action: "togglePanel" });
 });
 
-// Handle installation
-chrome.runtime.onInstalled.addListener(() => {
-  console.log('LiquiSight installed');
-  chrome.storage.local.set({
-    isActive: false,
-    stats: { todayScans: 0, portfolioCount: 0, alertsCount: 0 }
-  });
-});
-
-// Keyboard shortcut handling
+// Alt+L keyboard shortcut -> same behavior
 chrome.commands.onCommand.addListener((command) => {
-  if (command === 'toggle-liqui-sight') {
+  if (command === "toggle-liquisight") {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'togglePanel' });
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "togglePanel" });
       }
     });
   }

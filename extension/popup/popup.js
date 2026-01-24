@@ -1,109 +1,137 @@
-// LiquiSight Popup Controller
-class LiquiSightPopup {
-  constructor() {
-    this.isActive = false;
-    this.init();
-  }
+// popup.js - LiquiSight Extension Popup
 
-  async init() {
-    await this.loadState();
-    this.bindEvents();
-    this.updateUI();
-    this.loadStats();
-  }
+document.addEventListener("DOMContentLoaded", () => {
+  const authView = document.getElementById("authView");
+  const mainView = document.getElementById("mainView");
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const activateBtn = document.getElementById("activateBtn");
+  const userEmailEl = document.getElementById("userEmail");
+  const statusEl = document.getElementById("status");
 
-  async loadState() {
-    const result = await chrome.storage.local.get(['isActive', 'user', 'stats']);
-    this.isActive = result.isActive || false;
-    this.user = result.user || null;
-    this.stats = result.stats || { todayScans: 0, portfolioCount: 0, alertsCount: 0 };
-  }
+  // Check if user is logged in
+  chrome.storage.local.get(["user"], ({ user }) => {
+    if (user && user.email) {
+      showMainView(user.email);
+    }
+  });
 
-  bindEvents() {
-    // Activate Button
-    document.getElementById('activateBtn').addEventListener('click', () => this.toggleActivation());
-    
-    // Quick Actions
-    document.getElementById('scanPageBtn').addEventListener('click', () => this.scanPage());
-    document.getElementById('selectAreaBtn').addEventListener('click', () => this.selectArea());
-    document.getElementById('historyBtn').addEventListener('click', () => this.openHistory());
-    
-    // Footer Links
-    document.getElementById('openDashboard').addEventListener('click', (e) => {
-      e.preventDefault();
-      chrome.tabs.create({ url: 'https://liqui-sight.vercel.app/dashboard' });
-    });
-    
-    document.getElementById('settingsBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      this.openSettings();
-    });
-  }
+  // Login handler - THIS IS THE KEY PART
+  loginBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-  async toggleActivation() {
-    this.isActive = !this.isActive;
-    await chrome.storage.local.set({ isActive: this.isActive });
+    if (!email || !password) {
+      statusEl.textContent = "Please enter email and password";
+      return;
+    }
+
+    statusEl.textContent = "Logging in...";
+
+    // Save user session
+    await chrome.storage.local.set({ user: { email } });
     
-    // Send message to content script
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab) {
-      chrome.tabs.sendMessage(tab.id, { 
-        action: this.isActive ? 'activate' : 'deactivate' 
+    // Activate the side panel on current tab
+    await activatePanel();
+    
+    // Close popup
+    window.close();
+  });
+
+  // Logout handler
+  logoutBtn.addEventListener("click", () => {
+    chrome.storage.local.remove(["user"], () => {
+      showAuthView();
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]?.id) {
+          chrome.tabs.sendMessage(tabs[0].id, { action: "deactivate" }).catch(() => {});
+        }
       });
-    }
-    
-    this.updateUI();
-  }
+    });
+  });
 
-  updateUI() {
-    const btn = document.getElementById('activateBtn');
-    const btnText = btn.querySelector('.btn-text');
-    const statusIndicator = document.getElementById('statusIndicator');
-    const statusText = statusIndicator.querySelector('.status-text');
-    
-    if (this.isActive) {
-      btn.classList.add('active');
-      btnText.textContent = 'LiquiSight Active';
-      statusIndicator.classList.add('active');
-      statusText.textContent = 'Analyzing';
-    } else {
-      btn.classList.remove('active');
-      btnText.textContent = 'Activate LiquiSight';
-      statusIndicator.classList.remove('active');
-      statusText.textContent = 'Ready';
-    }
-  }
-
-  loadStats() {
-    document.getElementById('todayScans').textContent = this.stats.todayScans;
-    document.getElementById('portfolioCount').textContent = this.stats.portfolioCount;
-    document.getElementById('alertsCount').textContent = this.stats.alertsCount;
-  }
-
-  async scanPage() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab) {
-      chrome.tabs.sendMessage(tab.id, { action: 'scanFullPage' });
-    }
+  // Activate panel button
+  activateBtn.addEventListener("click", async () => {
+    await activatePanel();
     window.close();
+  });
+
+  // Enter key handlers
+  passwordInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") loginBtn.click();
+  });
+
+  emailInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") passwordInput.focus();
+  });
+
+  function showAuthView() {
+    authView.classList.remove("hidden");
+    mainView.classList.remove("active");
+    emailInput.value = "";
+    passwordInput.value = "";
+    statusEl.textContent = "";
   }
 
-  async selectArea() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (tab) {
-      chrome.tabs.sendMessage(tab.id, { action: 'selectArea' });
+  function showMainView(email) {
+    authView.classList.add("hidden");
+    mainView.classList.add("active");
+    userEmailEl.textContent = email;
+  }
+
+  async function activatePanel() {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) {
+        alert("No active tab found");
+        return;
+      }
+      
+      // Check if we can inject on this page
+      const url = tab.url || "";
+      if (url.startsWith("chrome://") || url.startsWith("chrome-extension://") || url.startsWith("edge://") || url === "" || url.startsWith("about:")) {
+        alert("Cannot open LiquiSight on this page.\\n\\nPlease navigate to a website first (e.g., google.com, tradingview.com)");
+        return;
+      }
+      
+      const tabId = tab.id;
+      
+      // Inject CSS first
+      try {
+        await chrome.scripting.insertCSS({
+          target: { tabId: tabId },
+          files: ["content/style.css"]
+        });
+      } catch (e) {
+        console.log("CSS:", e.message);
+      }
+      
+      // Inject content script
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tabId },
+          files: ["content/content.js"]
+        });
+      } catch (e) {
+        console.log("Script:", e.message);
+      }
+      
+      // Wait for script to initialize
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Send activate message
+      try {
+        await chrome.tabs.sendMessage(tabId, { action: "activate" });
+      } catch (e) {
+        console.log("Message:", e.message);
+      }
+      
+    } catch (error) {
+      console.error("activatePanel error:", error);
+      alert("Error: " + error.message);
     }
-    window.close();
+    }
   }
-
-  openHistory() {
-    chrome.tabs.create({ url: 'https://liqui-sight.vercel.app/history' });
-  }
-
-  openSettings() {
-    chrome.tabs.create({ url: 'https://liqui-sight.vercel.app/settings' });
-  }
-}
-
-// Initialize
-new LiquiSightPopup();
+);
