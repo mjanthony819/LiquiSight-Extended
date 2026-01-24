@@ -17,6 +17,12 @@
   let selectionOverlay = null;
   let selectionBox = null;
   let isActivated = false;
+  let isProcessing = false;
+  let scanPageBtnEl = null;
+  let selectAreaBtnEl = null;
+  let historyBtnEl = null;
+  let chatInputEl = null;
+  let chatSendBtnEl = null;
 
   // Expose globally
   window.liquiOpenPanel = openLiquiPanel;
@@ -129,10 +135,16 @@
     chatMessagesEl = panel.querySelector("#liqui-chat-messages");
     statusTextEl = panel.querySelector("#liqui-status-text");
 
+    scanPageBtnEl = panel.querySelector("#liqui-scan-page");
+    selectAreaBtnEl = panel.querySelector("#liqui-select-area");
+    historyBtnEl = panel.querySelector("#liqui-history");
+    chatInputEl = panel.querySelector("#liqui-chat-input");
+    chatSendBtnEl = panel.querySelector("#liqui-chat-send");
+
     // Event listeners
-    panel.querySelector("#liqui-scan-page").addEventListener("click", handleScanPage);
-    panel.querySelector("#liqui-select-area").addEventListener("click", handleSelectArea);
-    panel.querySelector("#liqui-history").addEventListener("click", showHistory);
+    scanPageBtnEl.addEventListener("click", handleScanPage);
+    selectAreaBtnEl.addEventListener("click", handleSelectArea);
+    historyBtnEl.addEventListener("click", showHistory);
     panel.querySelector("#liqui-activate-btn").addEventListener("click", () => {
       isActivated = !isActivated;
       addBotMessage("LiquiSight is active on this page. Use \"Scan Page\" or \"Select Area\" and I'll interpret the price action for you.");
@@ -144,6 +156,17 @@
     inputEl.addEventListener("keydown", (e) => { if (e.key === "Enter") handleUserChat(inputEl); });
 
     addBotMessage("Hey, I'm LiquiSight.\\n\\nOpen any TradingView / Yahoo Finance style page, then:\\n• Use \"Scan Page\" to read all visible charts\\n• Or \"Select Area\" and drag around one chart.\\n\\nI'll post my analysis right here in the chat.");
+  }
+
+  function setBusy(busy, statusLabel) {
+    isProcessing = busy;
+    if (panel) panel.classList.toggle("liqui-busy", busy);
+    if (scanPageBtnEl) scanPageBtnEl.disabled = busy;
+    if (selectAreaBtnEl) selectAreaBtnEl.disabled = busy;
+    if (historyBtnEl) historyBtnEl.disabled = busy;
+    if (chatInputEl) chatInputEl.disabled = busy;
+    if (chatSendBtnEl) chatSendBtnEl.disabled = busy;
+    if (busy && statusLabel) setStatus(statusLabel);
   }
 
   function addBotMessage(text) {
@@ -165,11 +188,39 @@
   }
 
   function handleUserChat(inputEl) {
+    if (isProcessing) return;
     const text = inputEl.value.trim();
     if (!text) return;
     addUserMessage(text);
     inputEl.value = "";
-    setTimeout(() => addBotMessage("For detailed analysis, use \"Scan Page\" or \"Select Area\" to capture the chart."), 500);
+
+    setBusy(true, "Thinking...");
+    chrome.runtime.sendMessage(
+      {
+        action: "sendChatMessage",
+        message: text,
+        context: location.href,
+      },
+      (response) => {
+        setBusy(false);
+
+        if (chrome.runtime.lastError) {
+          addBotMessage("Chat failed: " + chrome.runtime.lastError.message);
+          setStatus("Ready");
+          return;
+        }
+
+        if (!response?.ok) {
+          addBotMessage("Chat failed: " + (response?.error || "Unknown error"));
+          setStatus("Ready");
+          return;
+        }
+
+        const reply = response.result?.reply || "Sorry — no reply returned."
+        addBotMessage(reply);
+        setStatus("Ready");
+      }
+    );
   }
 
   function setStatus(label) {
@@ -184,21 +235,46 @@
   }
 
   function handleScanPage() {
+    if (isProcessing) return;
+    setBusy(true, "Scanning...");
     setStatus("Scanning page...");
     addBotMessage("Scanning this page for charts...");
     runScanEffect();
-    setTimeout(() => {
-      const analysis = generateAnalysis();
-      addBotMessage(formatAnalysis(analysis, "page"));
-      metricScans++;
-      metricPortfolio++;
-      updateMetrics();
-      saveToPortfolio(analysis);
-      setStatus("Ready");
-    }, 2000);
+    chrome.runtime.sendMessage(
+      {
+        action: "sendChartForAnalysis",
+        captureVisible: true,
+        context: location.href,
+      },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          addBotMessage("Error contacting extension background: " + chrome.runtime.lastError.message);
+          setBusy(false);
+          setStatus("Ready");
+          return;
+        }
+
+        if (!response?.ok) {
+          addBotMessage("Analysis failed: " + (response?.error || "Unknown error"));
+          setBusy(false);
+          setStatus("Ready");
+          return;
+        }
+
+        const analysis = response.result;
+        addBotMessage(formatBackendAnalysis(analysis, "page"));
+        metricScans++;
+        metricPortfolio++;
+        updateMetrics();
+        saveToPortfolio(analysis);
+        setBusy(false);
+        setStatus("Ready");
+      }
+    );
   }
 
   function handleSelectArea() {
+    if (isProcessing) return;
     setStatus("Select an area...");
     addBotMessage("Drag on the page to select a chart region.");
     if (selectionOverlay) return;
@@ -230,14 +306,43 @@
       const rect = selectionBox.getBoundingClientRect();
       selectionOverlay.remove(); selectionOverlay = null; selectionBox = null;
       if (rect.width > 20 && rect.height > 20) {
-        setStatus("Analyzing...");
-        setTimeout(() => {
-          const analysis = generateAnalysis();
-          addBotMessage(formatAnalysis(analysis, "selected area"));
-          metricScans++; metricPortfolio++; updateMetrics();
-          saveToPortfolio(analysis);
-          setStatus("Ready");
-        }, 1500);
+        setBusy(true, "Analyzing...");
+        setStatus("Analyzing selection...");
+        chrome.runtime.sendMessage(
+          {
+            action: "sendChartForAnalysis",
+            captureVisible: true,
+            crop: {
+              x: rect.x * window.devicePixelRatio,
+              y: rect.y * window.devicePixelRatio,
+              width: rect.width * window.devicePixelRatio,
+              height: rect.height * window.devicePixelRatio,
+            },
+            context: location.href,
+          },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              addBotMessage("Error contacting extension background: " + chrome.runtime.lastError.message);
+              setBusy(false);
+              setStatus("Ready");
+              return;
+            }
+
+            if (!response?.ok) {
+              addBotMessage("Analysis failed: " + (response?.error || "Unknown error"));
+              setBusy(false);
+              setStatus("Ready");
+              return;
+            }
+
+            const analysis = response.result;
+            addBotMessage(formatBackendAnalysis(analysis, "selected area"));
+            metricScans++; metricPortfolio++; updateMetrics();
+            saveToPortfolio(analysis);
+            setBusy(false);
+            setStatus("Ready");
+          }
+        );
       } else { setStatus("Ready"); }
     }
     selectionOverlay.addEventListener("mousedown", onMouseDown);
@@ -275,6 +380,20 @@
     };
   }
 
+  function formatBackendAnalysis(a, scope) {
+    const stockName = a?.stock_name || "UNKNOWN";
+    const trend = a?.trend || "Sideways";
+    const risk = a?.risk || "Medium";
+    const confidence = typeof a?.confidence === "number" ? Math.round(a.confidence * 100) + "%" : "N/A";
+    const explanation = a?.explanation || "";
+    return "Here's what I see in the " + scope + ":\n\n" +
+      "• Stock: " + stockName + "\n" +
+      "• Trend: " + trend + "\n" +
+      "• Risk: " + risk + "\n" +
+      "• Confidence: " + confidence + "\n\n" +
+      explanation;
+  }
+
   function formatAnalysis(a, scope) {
     return "Here's what I see in the " + scope + ":\\n\\n• Trend: " + a.trend.value + "\\n• Strength: " + a.strength +
       "\\n• Volatility: " + a.volatility + "\\n• Risk: " + a.risk + "\\n• Confidence: " + a.confidence + "%\\n\\n" +
@@ -294,8 +413,9 @@
       const p = r.portfolio || [];
       if (!p.length) { addBotMessage("No scans yet. Use \"Scan Page\" or \"Select Area\"."); return; }
       const last = p[p.length - 1];
+      const trendText = last.analysis?.trend?.value || last.analysis?.trend || "Unknown";
       addBotMessage("Latest scan:\\n\\n• Page: " + last.title + "\\n• When: " + new Date(last.timestamp).toLocaleString() +
-        "\\n• Trend: " + last.analysis.trend.value + "\\n\\nTotal: " + p.length + " scan(s).");
+        "\n• Trend: " + trendText + "\n\nTotal: " + p.length + " scan(s).");
     });
   }
 })();
