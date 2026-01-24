@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { X, Zap, Mail, ArrowRight, Loader2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { signIn } from 'next-auth/react'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -27,21 +26,23 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
 
   const handleContinue = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 500))
     setIsLoading(false)
     onLogin()
   }
 
   const handleGoogleLogin = async () => {
     setIsLoading(true)
-    // Use NextAuth.js to sign in with Google
-    await signIn('google', { callbackUrl: '/' })
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    setIsLoading(false)
+    onLogin()
   }
 
   const handleGitHubLogin = async () => {
     setIsLoading(true)
-    // Use NextAuth.js to sign in with GitHub
-    await signIn('github', { callbackUrl: '/' })
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    setIsLoading(false)
+    onLogin()
   }
 
   // Theme-aware styles
@@ -218,8 +219,8 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
             {/* Continue Button */}
             <button
               onClick={handleContinue}
-              disabled={isLoading || !email}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-indigo-500/25"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />

@@ -1,6 +1,5 @@
 'use client'
 
-import { useSession, signOut } from 'next-auth/react'
 import { useMemo } from 'react'
 import {
   User,
@@ -10,7 +9,6 @@ import {
   Bell,
   Moon,
   Sun,
-  LogOut,
   ChevronRight,
   BarChart3,
   History,
@@ -26,7 +24,6 @@ import { Card } from '@/components/ui/card'
 import { useScans } from '@/context/scans-context'
 
 export default function Profile() {
-  const { data: session } = useSession()
   const { theme, setTheme } = useTheme()
   const { scans } = useScans()
 
@@ -39,11 +36,8 @@ export default function Profile() {
     return { total, highRisk, avgConfidence, bullish, bearish }
   }, [scans])
 
-  const user = session?.user
-
-  const handleSignOut = () => {
-    signOut({ callbackUrl: '/' })
-  }
+  // Default user for demo
+  const user = { name: 'Demo User', email: 'demo@liquisight.com', image: null }
 
   const handleExportData = () => {
     const dataStr = JSON.stringify(scans, null, 2)
@@ -247,46 +241,6 @@ export default function Profile() {
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </a>
-          </div>
-        </Card>
-
-        {/* Danger Zone */}
-        <Card className="border border-destructive/30 overflow-hidden">
-          <div className="p-4 border-b border-destructive/20 bg-destructive/5">
-            <h3 className="font-semibold text-destructive flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              Danger Zone
-            </h3>
-          </div>
-
-          <div className="divide-y divide-border/50">
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center justify-between p-4 hover:bg-destructive/5 transition-colors text-left"
-            >
-              <div className="flex items-center gap-3">
-                <LogOut className="w-5 h-5 text-destructive" />
-                <div>
-                  <p className="text-sm font-medium text-destructive">Sign Out</p>
-                  <p className="text-xs text-muted-foreground">Log out of your account</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-destructive" />
-            </button>
-
-            <button
-              className="w-full flex items-center justify-between p-4 hover:bg-destructive/5 transition-colors text-left opacity-50 cursor-not-allowed"
-              disabled
-            >
-              <div className="flex items-center gap-3">
-                <Trash2 className="w-5 h-5 text-destructive" />
-                <div>
-                  <p className="text-sm font-medium text-destructive">Delete Account</p>
-                  <p className="text-xs text-muted-foreground">Permanently delete your account and data</p>
-                </div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-destructive" />
-            </button>
           </div>
         </Card>
 

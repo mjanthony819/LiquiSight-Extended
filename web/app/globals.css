@@ -3,20 +3,37 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Smooth theme transition */
-*,
-*::before,
-*::after {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
+/* 
+ * PERFORMANT theme transition - only animate root level 
+ * Using will-change and GPU acceleration
+ */
+html {
+  color-scheme: light;
 }
 
-/* Disable transition on page load to prevent flash */
-.no-transition *,
-.no-transition *::before,
-.no-transition *::after {
-  transition: none !important;
+html.dark {
+  color-scheme: dark;
+}
+
+/* Only transition on specific containers, not all elements */
+html,
+body,
+.bg-background,
+.bg-card,
+.bg-sidebar,
+.bg-muted {
+  transition: background-color 320ms cubic-bezier(0.2, 0, 0, 1), color 320ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body,
+  .bg-background,
+  .bg-card,
+  .bg-sidebar,
+  .bg-muted {
+    transition: none !important;
+  }
 }
 
 :root {

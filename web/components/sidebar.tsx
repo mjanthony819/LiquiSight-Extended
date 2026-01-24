@@ -1,7 +1,6 @@
 'use client'
 
-import { BarChart3, History, Zap, ChevronRight, Sparkles, LogOut, User } from 'lucide-react'
-import { signOut, useSession } from 'next-auth/react'
+import { BarChart3, History, Zap, ChevronRight, Sparkles, User, Wallet } from 'lucide-react'
 
 interface SidebarProps {
   currentPage: string
@@ -10,11 +9,12 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ currentPage, onNavigate, onLogout }: SidebarProps) {
-  const { data: session } = useSession()
-  const user = session?.user
+  // Default user for demo
+  const user = { name: 'Demo User', email: 'demo@liquisight.com', image: null }
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'portfolio', label: 'Portfolio', icon: Wallet },
     { id: 'history', label: 'Scan History', icon: History },
   ]
 
