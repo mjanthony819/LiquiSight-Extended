@@ -69,8 +69,8 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
     },
     {
       icon: Briefcase,
-      title: 'Portfolio View',
-      description: 'Organize and monitor all your tracked assets in one unified dashboard.',
+      title: 'Scan-First Dashboard',
+      description: 'A clean dashboard built entirely from real scan history—no fake portfolio widgets.',
     },
   ]
 

@@ -44,7 +44,7 @@ IMPORTANT RULES:
 - If uncertain, lower your confidence score rather than guessing
 - Keep explanations factual and observation-based
 
-Respond ONLY with valid JSON in this exact format:
+Return ONLY a single JSON object (no markdown, no code fences, no extra keys) in this exact format:
 {
   "trend": "Uptrend" | "Downtrend" | "Sideways",
   "risk": "Low" | "Medium" | "High",
@@ -79,9 +79,58 @@ def _encode_image_to_base64(image: Image.Image) -> str:
     # Convert to RGB if necessary (handles RGBA, P mode, etc.)
     if image.mode not in ("RGB", "L"):
         image = image.convert("RGB")
+
+    # Keep requests small and consistent for vision models
+    max_dim = 1024
+    if max(image.size) > max_dim:
+        resized = image.copy()
+        resized.thumbnail((max_dim, max_dim))
+        image = resized
+
     image.save(buffer, format="PNG")
     buffer.seek(0)
     return base64.b64encode(buffer.read()).decode("utf-8")
+
+
+def _extract_first_json_object(text: str) -> str:
+    """Extract the first balanced JSON object from text.
+
+    Handles nested braces and ignores braces inside strings.
+    """
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object found")
+
+    depth = 0
+    in_string = False
+    escape = False
+
+    for idx in range(start, len(text)):
+        ch = text[idx]
+
+        if in_string:
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                escape = True
+                continue
+            if ch == '"':
+                in_string = False
+            continue
+
+        if ch == '"':
+            in_string = True
+            continue
+
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : idx + 1]
+
+    raise ValueError("Unbalanced JSON object")
 
 
 def _parse_ai_response(response_text: str) -> dict:
@@ -93,11 +142,9 @@ def _parse_ai_response(response_text: str) -> dict:
         json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", response_text, re.DOTALL)
         if json_match:
             return json.loads(json_match.group(1))
-        # Try to find raw JSON object
-        json_match = re.search(r"\{[^{}]*\}", response_text, re.DOTALL)
-        if json_match:
-            return json.loads(json_match.group(0))
-        raise ValueError("Could not parse JSON from AI response")
+        # Try to find a balanced JSON object anywhere in the response
+        extracted = _extract_first_json_object(response_text)
+        return json.loads(extracted)
 
 
 def _validate_result(result: dict) -> dict:
@@ -136,11 +183,12 @@ def _get_demo_response(stock_name: str) -> AnalysisResult:
     Generate a professional demo response when no API is available.
     Returns realistic-looking analysis with low confidence.
     """
-    trend = random.choice(["Uptrend", "Downtrend", "Sideways"])
+    rng = random.Random(stock_name)
+    trend = rng.choice(["Uptrend", "Downtrend", "Sideways"])
     risk_options = {"Uptrend": "Medium", "Downtrend": "High", "Sideways": "Low"}
     risk = risk_options[trend]
-    confidence = round(random.uniform(0.30, 0.40), 2)
-    explanation = random.choice(_DEMO_EXPLANATIONS[trend])
+    confidence = round(rng.uniform(0.30, 0.40), 2)
+    explanation = rng.choice(_DEMO_EXPLANATIONS[trend])
     
     return {
         "stock_name": stock_name,
@@ -163,16 +211,16 @@ def _analyze_with_openrouter(image: Image.Image, stock_name: Optional[str]) -> O
         if not api_key:
             return None
         
-        client = OpenAI(
-            api_key=api_key,
-            base_url="https://openrouter.ai/api/v1",
-        )
+        base_url = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+        model = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+
+        client = OpenAI(api_key=api_key, base_url=base_url)
         
         image_base64 = _encode_image_to_base64(image)
         user_message = f"Analyze this stock chart for {stock_name}." if stock_name else "Analyze this stock chart image."
         
         response = client.chat.completions.create(
-            model="openai/gpt-4o-mini",
+            model=model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {

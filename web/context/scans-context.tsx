@@ -1,15 +1,18 @@
+
 'use client'
 
-import React, { createContext, useContext, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react'
+import { fetchLatestScans, ScanRecord } from '@/lib/analyze'
+import { onScansUpdated } from '@/lib/scans-events'
 
 export interface Scan {
   id: string
   symbol: string
   name: string
-  trend: 'up' | 'down'
-  trendPercent: string
+  trend: 'up' | 'down' | 'sideways'
   riskLevel: 'low' | 'medium' | 'high'
   confidence: number
+  explanation: string
   timestamp: string
 }
 
@@ -22,38 +25,65 @@ interface ScansContextType {
 const ScansContext = createContext<ScansContextType | undefined>(undefined)
 
 export function ScansProvider({ children }: { children: ReactNode }) {
-  const [scans, setScans] = useState<Scan[]>([
-    {
-      id: '1',
-      symbol: 'AAPL',
-      name: 'Apple Inc.',
-      trend: 'up',
-      trendPercent: '+5.2%',
-      riskLevel: 'low',
-      confidence: 94,
-      timestamp: '2 hours ago',
-    },
-    {
-      id: '2',
-      symbol: 'TSLA',
-      name: 'Tesla Inc.',
-      trend: 'down',
-      trendPercent: '-2.3%',
-      riskLevel: 'high',
-      confidence: 87,
-      timestamp: '4 hours ago',
-    },
-    {
-      id: '3',
-      symbol: 'MSFT',
-      name: 'Microsoft Corp.',
-      trend: 'up',
-      trendPercent: '+3.8%',
-      riskLevel: 'low',
-      confidence: 91,
-      timestamp: '6 hours ago',
-    },
-  ])
+  const [records, setRecords] = useState<ScanRecord[]>([])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function load() {
+      try {
+        const data = await fetchLatestScans(25)
+        if (isMounted) setRecords(data)
+      } catch (err) {
+        console.warn('Failed to load scans for context:', err)
+        if (isMounted) setRecords([])
+      }
+    }
+
+    load()
+    const unsubscribe = onScansUpdated(() => {
+      load()
+    })
+
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
+  }, [])
+
+  const scans = useMemo<Scan[]>(() => {
+    const now = new Date()
+
+    function formatRelative(dateString: string) {
+      const date = new Date(dateString)
+      const diffMs = now.getTime() - date.getTime()
+      const diffMins = Math.floor(diffMs / 60000)
+      const diffHours = Math.floor(diffMs / 3600000)
+      const diffDays = Math.floor(diffMs / 86400000)
+
+      if (diffMins < 1) return 'just now'
+      if (diffMins < 60) return `${diffMins} min ago`
+      if (diffHours < 24) return `${diffHours} hours ago`
+      return `${diffDays} days ago`
+    }
+
+    return records.map((r) => {
+      const symbol = (r.stock_name || '').trim().split(/\s+/)[0]?.toUpperCase() || '—'
+      const trend =
+        r.trend === 'Downtrend' ? 'down' : r.trend === 'Sideways' ? 'sideways' : 'up'
+
+      return {
+        id: r.id,
+        symbol,
+        name: r.stock_name,
+        trend,
+        riskLevel: r.risk.toLowerCase() as 'low' | 'medium' | 'high',
+        confidence: Math.round(r.confidence * 100),
+        explanation: r.explanation,
+        timestamp: formatRelative(r.created_at),
+      }
+    })
+  }, [records])
 
   const addScan = (scan: Omit<Scan, 'id' | 'timestamp'>) => {
     const newScan: Scan = {
@@ -61,11 +91,23 @@ export function ScansProvider({ children }: { children: ReactNode }) {
       id: Date.now().toString(),
       timestamp: 'just now',
     }
-    setScans((prev) => [newScan, ...prev])
+    setRecords((prev) => {
+      const synthetic: ScanRecord = {
+        id: newScan.id,
+        stock_name: newScan.name,
+        trend: newScan.trend === 'down' ? 'Downtrend' : newScan.trend === 'sideways' ? 'Sideways' : 'Uptrend',
+        risk: (newScan.riskLevel.charAt(0).toUpperCase() + newScan.riskLevel.slice(1)) as ScanRecord['risk'],
+        confidence: newScan.confidence / 100,
+        explanation: newScan.explanation,
+        user_id: null,
+        created_at: new Date().toISOString(),
+      }
+      return [synthetic, ...prev]
+    })
   }
 
   const removeScan = (id: string) => {
-    setScans((prev) => prev.filter((scan) => scan.id !== id))
+    setRecords((prev) => prev.filter((scan) => scan.id !== id))
   }
 
   return <ScansContext.Provider value={{ scans, addScan, removeScan }}>{children}</ScansContext.Provider>

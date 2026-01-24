@@ -186,3 +186,33 @@ export async function fetchLatestScans(limit: number = 10): Promise<ScanRecord[]
   }
 }
 
+export async function deleteScan(scanId: string): Promise<{ ok: boolean; error?: string }> {
+  if (!scanId) return { ok: false, error: 'Missing scan id' }
+
+  try {
+    const { data, error, count } = await supabase
+      .from('scans')
+      // Ask PostgREST for an exact affected-row count.
+      .delete({ count: 'exact' })
+      .eq('id', scanId)
+      // Request a return payload so we can detect "deleted 0 rows" even if no error is thrown.
+      .select('id')
+
+    if (error) return { ok: false, error: error.message }
+
+    const deletedCount = typeof count === 'number' ? count : Array.isArray(data) ? data.length : 0
+    if (deletedCount <= 0) {
+      return {
+        ok: false,
+        error:
+          'Delete did not remove any rows. This usually means Row Level Security (RLS) or permissions are blocking deletes for the current user/key. Update your Supabase RLS policies (or disable RLS for scans) to allow deletes.'
+      }
+    }
+
+    return { ok: true }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return { ok: false, error: message }
+  }
+}
+

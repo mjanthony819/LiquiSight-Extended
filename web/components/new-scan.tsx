@@ -7,6 +7,7 @@ import { Upload, Zap, ArrowRight, AlertCircle, Loader2, ArrowLeft, Sparkles, Che
 import { Card } from '@/components/ui/card'
 import { useScans } from '@/context/scans-context'
 import { analyzeAndSave } from '@/lib/analyze'
+import { emitScansUpdated } from '@/lib/scans-events'
 
 interface NewScanProps {
   onBack?: () => void
@@ -47,8 +48,7 @@ export default function NewScan({ onBack }: NewScanProps) {
       const { result, saved, error } = await analyzeAndSave(uploadedFile, stockName)
 
       const symbol = (result.stock_name || stockName).split(' ')[0].toUpperCase()
-      const trend = result.trend === 'Downtrend' ? 'down' : 'up'
-      const trendPercent = result.trend === 'Sideways' ? '0.0%' : trend === 'up' ? '+0.0%' : '-0.0%'
+      const trend = result.trend === 'Downtrend' ? 'down' : result.trend === 'Sideways' ? 'sideways' : 'up'
       const riskLevel = result.risk.toLowerCase() as 'low' | 'medium' | 'high'
       const confidence = Math.round(result.confidence * 100)
 
@@ -56,14 +56,18 @@ export default function NewScan({ onBack }: NewScanProps) {
         symbol,
         name: result.stock_name || stockName,
         trend,
-        trendPercent,
         riskLevel,
         confidence,
+        explanation: result.explanation,
       })
 
       if (!saved) {
         setResultType('save-error')
         setResultMessage(error ?? 'Failed to save scan to Supabase')
+      }
+
+      if (saved) {
+        emitScansUpdated()
       }
 
       setShowSuccess(true)

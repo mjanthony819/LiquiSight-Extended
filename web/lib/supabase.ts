@@ -58,7 +58,7 @@ export const supabase = {
   from: (table: string) => {
     const client = getSupabase()
     if (!client) {
-      // Return mock methods that resolve safely
+      // Return safe no-op methods for local-only mode
       return {
         select: () => ({
           order: () => ({
@@ -69,6 +69,11 @@ export const supabase = {
         insert: () => ({
           select: () => ({
             single: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } })
+          })
+        }),
+        delete: () => ({
+          eq: () => ({
+            select: () => Promise.resolve({ data: [], error: { message: 'Supabase not configured' }, count: 0 })
           })
         }),
       }

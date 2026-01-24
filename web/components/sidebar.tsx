@@ -1,7 +1,6 @@
 'use client'
 
-import { BarChart3, History, Wallet, Zap, ChevronRight, Sparkles, LogOut } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { BarChart3, History, Zap, ChevronRight, Sparkles, LogOut } from 'lucide-react'
 
 interface SidebarProps {
   currentPage: string
@@ -12,7 +11,6 @@ interface SidebarProps {
 export default function Sidebar({ currentPage, onNavigate, onLogout }: SidebarProps) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'portfolio', label: 'Portfolio', icon: Wallet },
     { id: 'history', label: 'Scan History', icon: History },
   ]
 
@@ -78,14 +76,6 @@ export default function Sidebar({ currentPage, onNavigate, onLogout }: SidebarPr
 
       {/* Footer */}
       <div className="relative p-4 border-t border-sidebar-border/50">
-        <div className="bg-gradient-to-br from-primary/10 to-accent/10 p-4 rounded-xl border border-primary/20 mb-3">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            <p className="text-xs font-bold text-accent">Pro Plan Active</p>
-          </div>
-          <p className="text-[11px] text-muted-foreground leading-relaxed">Unlimited scans & advanced AI insights</p>
-        </div>
-        
         {/* Logout Button */}
         {onLogout && (
           <button

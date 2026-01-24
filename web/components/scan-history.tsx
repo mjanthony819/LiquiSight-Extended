@@ -1,21 +1,25 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Zap, TrendingUp, TrendingDown, AlertCircle, CheckCircle, BarChart3, Sparkles, Search, ArrowUpRight, Loader2 } from 'lucide-react'
+import { TrendingUp, TrendingDown, AlertCircle, BarChart3, Sparkles, Search, Loader2, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { fetchLatestScans, ScanRecord } from '@/lib/analyze'
+import { deleteScan, fetchLatestScans, ScanRecord } from '@/lib/analyze'
+import { emitScansUpdated, onScansUpdated } from '@/lib/scans-events'
 
 export default function ScanHistory() {
   const [scans, setScans] = useState<ScanRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  const [query, setQuery] = useState('')
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadScans() {
       setIsLoading(true)
       setLoadError(false)
       try {
-        const data = await fetchLatestScans(10)
+        const data = await fetchLatestScans(50)
         setScans(data)
       } catch (err) {
         console.error('Failed to load scans:', err)
@@ -24,6 +28,12 @@ export default function ScanHistory() {
       setIsLoading(false)
     }
     loadScans()
+
+    const unsubscribe = onScansUpdated(() => {
+      loadScans()
+    })
+
+    return () => unsubscribe()
   }, [])
 
   const formatDate = (dateString: string) => {
@@ -63,6 +73,42 @@ export default function ScanHistory() {
     )
   }
 
+  const totalScans = scans.length
+  const avgConfidence =
+    totalScans === 0
+      ? 0
+      : (scans.reduce((sum, s) => sum + s.confidence, 0) / totalScans) * 100
+
+  const normalizedQuery = query.trim().toLowerCase()
+  const filteredScans = normalizedQuery
+    ? scans.filter((scan) => {
+        const haystack = `${scan.stock_name} ${scan.trend} ${scan.risk} ${scan.explanation}`.toLowerCase()
+        return haystack.includes(normalizedQuery)
+      })
+    : scans
+
+  async function handleDelete(scan: ScanRecord) {
+    setDeleteError(null)
+
+    const confirmed = window.confirm(`Delete scan for "${scan.stock_name}"? This cannot be undone.`)
+    if (!confirmed) return
+
+    setDeletingId(scan.id)
+    try {
+      const res = await deleteScan(scan.id)
+      if (!res.ok) {
+        setDeleteError(res.error ?? 'Failed to delete scan')
+        return
+      }
+
+      // Optimistic UI update + refresh other views
+      setScans((prev) => prev.filter((s) => s.id !== scan.id))
+      emitScansUpdated()
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
   return (
     <div className="flex-1 bg-background min-h-screen">
       {/* Hero Header */}
@@ -92,7 +138,7 @@ export default function ScanHistory() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Total Scans</p>
-                  <p className="text-3xl font-bold text-card-foreground tracking-tight">247</p>
+                  <p className="text-3xl font-bold text-card-foreground tracking-tight">{totalScans}</p>
                 </div>
                 <div className="w-11 h-11 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
                   <BarChart3 className="w-5 h-5 text-primary" />
@@ -106,7 +152,7 @@ export default function ScanHistory() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Insights Generated</p>
-                  <p className="text-3xl font-bold text-card-foreground tracking-tight">1,340</p>
+                  <p className="text-3xl font-bold text-card-foreground tracking-tight">{totalScans}</p>
                 </div>
                 <div className="w-11 h-11 rounded-xl bg-accent/10 ring-1 ring-accent/20 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-accent" />
@@ -120,7 +166,7 @@ export default function ScanHistory() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Avg Confidence</p>
-                  <p className="text-3xl font-bold text-card-foreground tracking-tight">88.4%</p>
+                  <p className="text-3xl font-bold text-card-foreground tracking-tight">{avgConfidence.toFixed(1)}%</p>
                 </div>
                 <div className="w-11 h-11 rounded-xl bg-success/10 ring-1 ring-success/20 flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-success" />
@@ -130,28 +176,39 @@ export default function ScanHistory() {
           </Card>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex gap-2">
-            <button className="px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors">
-              All Scans
-            </button>
-            <button className="px-4 py-2.5 rounded-xl bg-muted/50 text-muted-foreground text-sm font-medium hover:bg-muted transition-colors">
-              Completed
-            </button>
-            <button className="px-4 py-2.5 rounded-xl bg-muted/50 text-muted-foreground text-sm font-medium hover:bg-muted transition-colors">
-              In Progress
-            </button>
-          </div>
-          <div className="relative">
+        {/* Search */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="relative w-full md:max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search scans..."
-              className="w-full md:w-64 pl-10 pr-4 py-2.5 rounded-xl bg-input border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by stock, trend, risk, or text..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-input border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
+          {query.trim() ? (
+            <p className="text-sm text-muted-foreground whitespace-nowrap">
+              Showing <span className="font-semibold text-foreground">{filteredScans.length}</span> of {totalScans}
+            </p>
+          ) : null}
         </div>
+
+        {deleteError ? (
+          <Card className="bg-card border border-destructive/30 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-destructive">{deleteError}</p>
+              <button
+                type="button"
+                onClick={() => setDeleteError(null)}
+                className="text-xs font-semibold text-destructive hover:opacity-80"
+              >
+                Dismiss
+              </button>
+            </div>
+          </Card>
+        ) : null}
 
         {/* Scan Cards */}
         <div className="space-y-3">
@@ -165,14 +222,16 @@ export default function ScanHistory() {
               <h3 className="text-lg font-semibold text-card-foreground mb-2">Unable to load scans</h3>
               <p className="text-muted-foreground">Database connection unavailable. Scans will be stored locally.</p>
             </Card>
-          ) : scans.length === 0 ? (
+          ) : filteredScans.length === 0 ? (
             <Card className="bg-card border border-border/50 p-12 text-center">
               <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-card-foreground mb-2">No scans yet</h3>
-              <p className="text-muted-foreground">Start analyzing charts to see your history here.</p>
+              <h3 className="text-lg font-semibold text-card-foreground mb-2">No matching scans</h3>
+              <p className="text-muted-foreground">
+                {totalScans === 0 ? 'Start analyzing charts to see your history here.' : 'Try a different search term.'}
+              </p>
             </Card>
           ) : (
-            scans.map((scan) => (
+            filteredScans.map((scan) => (
               <Card
                 key={scan.id}
                 className="group bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden card-hover"
@@ -193,6 +252,18 @@ export default function ScanHistory() {
                       <p className="text-sm text-muted-foreground line-clamp-2">{scan.explanation}</p>
                     </div>
                     <div className="text-right">
+                      <div className="flex items-center justify-end gap-2 mb-2">
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(scan)}
+                          disabled={deletingId === scan.id}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-muted/20 px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/5 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                          aria-label={`Delete scan for ${scan.stock_name}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          {deletingId === scan.id ? 'Deleting…' : 'Delete'}
+                        </button>
+                      </div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Confidence</p>
                       <p className="text-2xl font-bold text-primary">{Math.round(scan.confidence * 100)}%</p>
                     </div>
@@ -209,10 +280,6 @@ export default function ScanHistory() {
                         <p className="font-semibold text-card-foreground">{formatDate(scan.created_at)}</p>
                       </div>
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/50 text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300 text-sm font-semibold group-hover:bg-primary group-hover:text-primary-foreground">
-                      View Details
-                      <ArrowUpRight className="w-4 h-4 opacity-70" />
-                    </button>
                   </div>
                 </div>
               </Card>

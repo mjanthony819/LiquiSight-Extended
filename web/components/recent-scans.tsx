@@ -1,6 +1,6 @@
 'use client'
 
-import { TrendingUp, TrendingDown, Clock, ChevronRight, Sparkles } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Clock, ChevronRight, Sparkles } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { useScans } from '@/context/scans-context'
 
@@ -53,8 +53,9 @@ export default function RecentScans({ onScanClick, maxItems = 6 }: RecentScansPr
 
       <div className="divide-y divide-border/30">
         {displayedScans.map((scan, index) => {
-          const TrendIcon = scan.trend === 'up' ? TrendingUp : TrendingDown
-          const trendColor = scan.trend === 'up' ? 'text-success' : 'text-destructive'
+          const TrendIcon = scan.trend === 'up' ? TrendingUp : scan.trend === 'down' ? TrendingDown : Minus
+          const trendColor = scan.trend === 'up' ? 'text-success' : scan.trend === 'down' ? 'text-destructive' : 'text-muted-foreground'
+          const trendLabel = scan.trend === 'up' ? 'Uptrend' : scan.trend === 'down' ? 'Downtrend' : 'Sideways'
 
           return (
             <button
@@ -73,7 +74,7 @@ export default function RecentScans({ onScanClick, maxItems = 6 }: RecentScansPr
                       <p className="font-semibold text-card-foreground group-hover:text-primary transition-colors">{scan.symbol}</p>
                       <div className={`${trendColor} flex items-center gap-1`}>
                         <TrendIcon className="w-3.5 h-3.5" />
-                        <span className="text-xs font-medium">{scan.trendPercent}</span>
+                        <span className="text-xs font-medium">{trendLabel}</span>
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground truncate">{scan.name}</p>
@@ -102,14 +103,6 @@ export default function RecentScans({ onScanClick, maxItems = 6 }: RecentScansPr
             </button>
           )
         })}
-      </div>
-
-      {/* View All Link */}
-      <div className="p-4 border-t border-border/30 bg-muted/10">
-        <button className="w-full py-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-2 group">
-          <span>View all scans</span>
-          <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-        </button>
       </div>
     </Card>
   )
