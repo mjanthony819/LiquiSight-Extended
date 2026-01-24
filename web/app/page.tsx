@@ -7,11 +7,22 @@ import Dashboard from '@/components/dashboard'
 import Portfolio from '@/components/portfolio'
 import ScanHistory from '@/components/scan-history'
 import NewScan from '@/components/new-scan'
-import ScanDetailPage from '@/components/scan-detail-page' // Import ScanDetailPage
+import ScanDetailPage from '@/components/scan-detail-page'
+import LandingPage from '@/components/landing-page'
 
 export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [currentPage, setCurrentPage] = useState('dashboard')
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null)
+
+  const handleLogin = () => {
+    setIsAuthenticated(true)
+  }
+
+  const handleLogout = () => {
+    setIsAuthenticated(false)
+    setCurrentPage('dashboard')
+  }
 
   const renderPage = () => {
     switch (currentPage) {
@@ -38,11 +49,16 @@ export default function Home() {
     }
   }
 
+  // Show landing page if not authenticated
+  if (!isAuthenticated) {
+    return <LandingPage onLogin={handleLogin} />
+  }
+
   return (
     <ScansProvider>
-      <div className="flex h-screen bg-background">
-        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
-        <main className="flex-1 overflow-auto">
+      <div className="flex h-screen bg-background overflow-hidden">
+        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} onLogout={handleLogout} />
+        <main className="flex-1 overflow-auto scroll-smooth">
           {renderPage()}
         </main>
       </div>
