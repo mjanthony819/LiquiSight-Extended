@@ -1,86 +1,64 @@
 'use client'
 
-import { Zap, TrendingUp, AlertCircle, CheckCircle, BarChart3, Sparkles, Search, ArrowUpRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Zap, TrendingUp, TrendingDown, AlertCircle, CheckCircle, BarChart3, Sparkles, Search, ArrowUpRight, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { fetchLatestScans, ScanRecord } from '@/lib/analyze'
 
 export default function ScanHistory() {
-  const scans = [
-    {
-      id: 1,
-      title: 'Market Volatility Analysis',
-      description: 'Detected unusual trading patterns in tech sector',
-      status: 'completed',
-      insights: 5,
-      date: '2 hours ago',
-      confidence: '92%',
-    },
-    {
-      id: 2,
-      title: 'Portfolio Risk Assessment',
-      description: 'Comprehensive risk analysis across all holdings',
-      status: 'completed',
-      insights: 8,
-      date: '4 hours ago',
-      confidence: '88%',
-    },
-    {
-      id: 3,
-      title: 'Sector Trend Detection',
-      description: 'Identified emerging opportunities in renewable energy',
-      status: 'completed',
-      insights: 3,
-      date: '1 day ago',
-      confidence: '85%',
-    },
-    {
-      id: 4,
-      title: 'Earnings Analysis',
-      description: 'Analyzed Q3 earnings reports from major companies',
-      status: 'in-progress',
-      insights: 12,
-      date: 'Running now',
-      confidence: '76%',
-    },
-    {
-      id: 5,
-      title: 'Sentiment Analysis',
-      description: 'Market sentiment tracking from news and social media',
-      status: 'completed',
-      insights: 6,
-      date: '2 days ago',
-      confidence: '91%',
-    },
-    {
-      id: 6,
-      title: 'Correlation Study',
-      description: 'Analyzed asset correlations for optimal diversification',
-      status: 'completed',
-      insights: 4,
-      date: '3 days ago',
-      confidence: '87%',
-    },
-  ]
+  const [scans, setScans] = useState<ScanRecord[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
-  const getStatusIcon = (status: string) => {
-    if (status === 'completed') {
-      return <CheckCircle className="w-4 h-4 text-success" />
+  useEffect(() => {
+    async function loadScans() {
+      setIsLoading(true)
+      setLoadError(false)
+      try {
+        const data = await fetchLatestScans(10)
+        setScans(data)
+      } catch (err) {
+        console.error('Failed to load scans:', err)
+        setLoadError(true)
+      }
+      setIsLoading(false)
     }
-    return <Zap className="w-4 h-4 text-accent animate-pulse" />
+    loadScans()
+  }, [])
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'just now'
+    if (diffMins < 60) return `${diffMins} min ago`
+    if (diffHours < 24) return `${diffHours} hours ago`
+    return `${diffDays} days ago`
   }
 
-  const getStatusBadge = (status: string) => {
-    if (status === 'completed') {
-      return (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-success/10 text-success border border-success/20 text-xs font-semibold">
-          <CheckCircle className="w-3 h-3" />
-          Completed
-        </div>
-      )
+  const getTrendIcon = (trend: string) => {
+    if (trend === 'Uptrend') {
+      return <TrendingUp className="w-4 h-4 text-success" />
+    }
+    if (trend === 'Downtrend') {
+      return <TrendingDown className="w-4 h-4 text-destructive" />
+    }
+    return <BarChart3 className="w-4 h-4 text-muted-foreground" />
+  }
+
+  const getRiskBadge = (risk: string) => {
+    const colors = {
+      Low: 'bg-success/10 text-success border-success/20',
+      Medium: 'bg-accent/10 text-accent border-accent/20',
+      High: 'bg-destructive/10 text-destructive border-destructive/20',
     }
     return (
-      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 text-accent border border-accent/20 text-xs font-semibold">
-        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-        In Progress
+      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold ${colors[risk as keyof typeof colors] || colors.Medium}`}>
+        {risk} Risk
       </div>
     )
   }
@@ -177,45 +155,69 @@ export default function ScanHistory() {
 
         {/* Scan Cards */}
         <div className="space-y-3">
-          {scans.map((scan) => (
-            <Card
-              key={scan.id}
-              className="group bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden card-hover"
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">{scan.title}</h3>
-                      {getStatusBadge(scan.status)}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{scan.description}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Confidence</p>
-                    <p className="text-2xl font-bold text-primary">{scan.confidence}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-border/30">
-                  <div className="flex items-center gap-6">
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Insights</p>
-                      <p className="font-semibold text-card-foreground">{scan.insights}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground mb-1">Timestamp</p>
-                      <p className="font-semibold text-card-foreground">{scan.date}</p>
-                    </div>
-                  </div>
-                  <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/50 text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300 text-sm font-semibold group-hover:bg-primary group-hover:text-primary-foreground">
-                    View Details
-                    <ArrowUpRight className="w-4 h-4 opacity-70" />
-                  </button>
-                </div>
-              </div>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+          ) : loadError ? (
+            <Card className="bg-card border border-border/50 p-12 text-center">
+              <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-card-foreground mb-2">Unable to load scans</h3>
+              <p className="text-muted-foreground">Database connection unavailable. Scans will be stored locally.</p>
             </Card>
-          ))}
+          ) : scans.length === 0 ? (
+            <Card className="bg-card border border-border/50 p-12 text-center">
+              <BarChart3 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-card-foreground mb-2">No scans yet</h3>
+              <p className="text-muted-foreground">Start analyzing charts to see your history here.</p>
+            </Card>
+          ) : (
+            scans.map((scan) => (
+              <Card
+                key={scan.id}
+                className="group bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden card-hover"
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">
+                          {scan.stock_name}
+                        </h3>
+                        {getRiskBadge(scan.risk)}
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                          {getTrendIcon(scan.trend)}
+                          {scan.trend}
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{scan.explanation}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Confidence</p>
+                      <p className="text-2xl font-bold text-primary">{Math.round(scan.confidence * 100)}%</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-border/30">
+                    <div className="flex items-center gap-6">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Trend</p>
+                        <p className="font-semibold text-card-foreground">{scan.trend}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Timestamp</p>
+                        <p className="font-semibold text-card-foreground">{formatDate(scan.created_at)}</p>
+                      </div>
+                    </div>
+                    <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-muted/50 text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-300 text-sm font-semibold group-hover:bg-primary group-hover:text-primary-foreground">
+                      View Details
+                      <ArrowUpRight className="w-4 h-4 opacity-70" />
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </div>

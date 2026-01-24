@@ -6,6 +6,7 @@ import { useState, useRef } from 'react'
 import { Upload, Zap, ArrowRight, AlertCircle, Loader2, ArrowLeft, Sparkles, CheckCircle2, Image as ImageIcon } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { useScans } from '@/context/scans-context'
+import { analyzeAndSave } from '@/lib/analyze'
 
 interface NewScanProps {
   onBack?: () => void
@@ -16,13 +17,17 @@ export default function NewScan({ onBack }: NewScanProps) {
   const [isWaiting, setIsWaiting] = useState(true)
   const [stockName, setStockName] = useState('')
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [resultMessage, setResultMessage] = useState<string | null>(null)
+  const [resultType, setResultType] = useState<'success' | 'save-error' | 'analysis-error'>('success')
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      setUploadedFile(file)
       const reader = new FileReader()
       reader.onload = (event) => {
         setUploadedImage(event.target?.result as string)
@@ -31,41 +36,54 @@ export default function NewScan({ onBack }: NewScanProps) {
     }
   }
 
-  const handleAnalyze = () => {
-    if (stockName && uploadedImage) {
-      setIsAnalyzing(true)
-      // Simulate analysis delay
-      setTimeout(() => {
-        // Generate random data for demo purposes
-        const trendDirection = Math.random() > 0.5 ? 'up' : 'down'
-        const trendPercent = Math.random() > 0.5 ? `+${Math.floor(Math.random() * 15)}%` : `-${Math.floor(Math.random() * 10)}%`
-        const riskLevels = ['low', 'medium', 'high'] as const
-        const riskLevel = riskLevels[Math.floor(Math.random() * 3)]
-        const confidence = 70 + Math.floor(Math.random() * 25)
+  const handleAnalyze = async () => {
+    if (!stockName || !uploadedImage || !uploadedFile) return
 
-        // Extract symbol (first part before space)
-        const symbol = stockName.split(' ')[0].toUpperCase()
+    setIsAnalyzing(true)
+    setResultMessage(null)
+    setResultType('success')
 
-        addScan({
-          symbol,
-          name: stockName,
-          trend: trendDirection as 'up' | 'down',
-          trendPercent,
-          riskLevel,
-          confidence,
-        })
+    try {
+      const { result, saved, error } = await analyzeAndSave(uploadedFile, stockName)
 
-        setIsAnalyzing(false)
-        setShowSuccess(true)
-        setStockName('')
-        setUploadedImage(null)
-        if (fileInputRef.current) fileInputRef.current.value = ''
+      const symbol = (result.stock_name || stockName).split(' ')[0].toUpperCase()
+      const trend = result.trend === 'Downtrend' ? 'down' : 'up'
+      const trendPercent = result.trend === 'Sideways' ? '0.0%' : trend === 'up' ? '+0.0%' : '-0.0%'
+      const riskLevel = result.risk.toLowerCase() as 'low' | 'medium' | 'high'
+      const confidence = Math.round(result.confidence * 100)
 
-        // Auto redirect after success
+      addScan({
+        symbol,
+        name: result.stock_name || stockName,
+        trend,
+        trendPercent,
+        riskLevel,
+        confidence,
+      })
+
+      if (!saved) {
+        setResultType('save-error')
+        setResultMessage(error ?? 'Failed to save scan to Supabase')
+      }
+
+      setShowSuccess(true)
+      setStockName('')
+      setUploadedImage(null)
+      setUploadedFile(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+
+      if (saved) {
         setTimeout(() => {
           onBack?.()
         }, 2000)
-      }, 2000)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Analysis failed'
+      setResultType('analysis-error')
+      setResultMessage(message)
+      setShowSuccess(true)
+    } finally {
+      setIsAnalyzing(false)
     }
   }
 
@@ -81,8 +99,29 @@ export default function NewScan({ onBack }: NewScanProps) {
               </div>
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-foreground mb-3 tracking-tight">Scan Complete!</h2>
-          <p className="text-muted-foreground mb-8 leading-relaxed">Your analysis has been added to the dashboard and portfolio. Redirecting...</p>
+          <h2 className="text-3xl font-bold text-foreground mb-3 tracking-tight">
+            {resultType === 'analysis-error'
+              ? 'Scan Failed'
+              : resultType === 'save-error'
+                ? 'Scan Completed (Not Saved)'
+                : 'Scan Complete!'}
+          </h2>
+          <p className="text-muted-foreground mb-6 leading-relaxed">
+            {resultType === 'analysis-error'
+              ? 'The analysis request failed. Please check the backend and try again.'
+              : resultType === 'save-error'
+                ? 'Your analysis was added locally, but saving to Supabase failed.'
+                : 'Your analysis has been saved and added to the dashboard. Redirecting...'}
+          </p>
+
+          {resultMessage && resultType !== 'success' && (
+            <div className="mb-6 p-4 rounded-xl border border-destructive/30 bg-destructive/5 text-left">
+              <p className="text-sm font-semibold text-foreground mb-1">
+                {resultType === 'analysis-error' ? 'Analysis error' : 'Save error'}
+              </p>
+              <p className="text-xs text-muted-foreground break-words">{resultMessage}</p>
+            </div>
+          )}
           <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-success to-accent rounded-full animate-pulse" style={{ width: '100%' }} />
           </div>
@@ -248,6 +287,7 @@ export default function NewScan({ onBack }: NewScanProps) {
                     <button
                       onClick={() => {
                         setUploadedImage(null)
+                        setUploadedFile(null)
                         if (fileInputRef.current) fileInputRef.current.value = ''
                       }}
                       className="text-xs text-primary hover:underline font-medium"

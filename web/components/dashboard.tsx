@@ -1,9 +1,10 @@
 'use client'
 
-import { Sparkles, Send, Download, CreditCard, Plus, ChevronRight, User } from 'lucide-react'
+import { Sparkles, Send, Download, CreditCard, Plus, ChevronRight, User, TrendingUp, TrendingDown, Minus, AlertTriangle, Shield, ShieldAlert } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useState } from 'react'
 import { ThemeToggle } from './theme-toggle'
+import { fetchLatestScans, ScanRecord } from '@/lib/analyze'
 
 interface DashboardProps {
   onOpenNewScan?: () => void
@@ -13,9 +14,23 @@ interface DashboardProps {
 export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [latestScan, setLatestScan] = useState<ScanRecord | null>(null)
+  const [loadError, setLoadError] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    async function loadLatestScan() {
+      try {
+        const scans = await fetchLatestScans(1)
+        if (scans.length > 0) {
+          setLatestScan(scans[0])
+        }
+      } catch (err) {
+        console.error('Failed to load latest scan:', err)
+        setLoadError(true)
+      }
+    }
+    loadLatestScan()
   }, [])
 
   const transactions = [
@@ -112,28 +127,76 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
             </div>
           </div>
 
-          {/* Top Stats Row */}
+          {/* Top Stats Row - Latest Scan Data */}
           <div className="grid grid-cols-3 gap-4 mb-8">
             <div className={styles.statCard}>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50"></div>
-                <span className={`text-xs ${styles.subtext}`}>Total Balance</span>
+                <div className={`w-2 h-2 rounded-full shadow-lg ${
+                  latestScan?.trend === 'Uptrend' ? 'bg-emerald-500 shadow-emerald-500/50' :
+                  latestScan?.trend === 'Downtrend' ? 'bg-red-500 shadow-red-500/50' :
+                  'bg-gray-500 shadow-gray-500/50'
+                }`}></div>
+                <span className={`text-xs ${styles.subtext}`}>Latest Trend</span>
               </div>
-              <p className={`text-2xl font-semibold ${styles.heading}`}>$675,993.98</p>
+              <div className="flex items-center gap-2">
+                {latestScan?.trend === 'Uptrend' && <TrendingUp className="w-5 h-5 text-emerald-500" />}
+                {latestScan?.trend === 'Downtrend' && <TrendingDown className="w-5 h-5 text-red-500" />}
+                {latestScan?.trend === 'Sideways' && <Minus className="w-5 h-5 text-gray-500" />}
+                {!latestScan && <Minus className="w-5 h-5 text-gray-500" />}
+                <p className={`text-2xl font-semibold ${styles.heading}`}>
+                  {latestScan?.trend || 'No Data'}
+                </p>
+              </div>
+              {latestScan && <p className={`text-xs ${styles.mutedText} mt-1`}>{latestScan.stock_name}</p>}
             </div>
             <div className={styles.statCard}>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-orange-500 shadow-lg shadow-orange-500/50"></div>
-                <span className={`text-xs ${styles.subtext}`}>Earnings</span>
+                <div className={`w-2 h-2 rounded-full shadow-lg ${
+                  latestScan?.risk === 'Low' ? 'bg-emerald-500 shadow-emerald-500/50' :
+                  latestScan?.risk === 'High' ? 'bg-red-500 shadow-red-500/50' :
+                  'bg-orange-500 shadow-orange-500/50'
+                }`}></div>
+                <span className={`text-xs ${styles.subtext}`}>Risk Level</span>
               </div>
-              <p className={`text-2xl font-semibold ${styles.heading}`}>$998,993.98</p>
+              <div className="flex items-center gap-2">
+                {latestScan?.risk === 'Low' && <Shield className="w-5 h-5 text-emerald-500" />}
+                {latestScan?.risk === 'Medium' && <AlertTriangle className="w-5 h-5 text-orange-500" />}
+                {latestScan?.risk === 'High' && <ShieldAlert className="w-5 h-5 text-red-500" />}
+                {!latestScan && <Shield className="w-5 h-5 text-gray-500" />}
+                <p className={`text-2xl font-semibold ${
+                  latestScan?.risk === 'Low' ? 'text-emerald-500' :
+                  latestScan?.risk === 'High' ? 'text-red-500' :
+                  latestScan?.risk === 'Medium' ? 'text-orange-500' :
+                  styles.heading
+                }`}>
+                  {latestScan?.risk || 'No Data'}
+                </p>
+              </div>
             </div>
             <div className={styles.statCard}>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-2 h-2 rounded-full bg-cyan-500 shadow-lg shadow-cyan-500/50"></div>
-                <span className={`text-xs ${styles.subtext}`}>Expenses</span>
+                <div className={`w-2 h-2 rounded-full shadow-lg ${
+                  latestScan && latestScan.confidence >= 0.75 ? 'bg-emerald-500 shadow-emerald-500/50' :
+                  latestScan && latestScan.confidence >= 0.5 ? 'bg-cyan-500 shadow-cyan-500/50' :
+                  'bg-orange-500 shadow-orange-500/50'
+                }`}></div>
+                <span className={`text-xs ${styles.subtext}`}>Confidence</span>
               </div>
-              <p className={`text-2xl font-semibold ${styles.heading}`}>$28,993.98</p>
+              <p className={`text-2xl font-semibold ${styles.heading}`}>
+                {latestScan ? `${Math.round(latestScan.confidence * 100)}%` : 'No Data'}
+              </p>
+              {latestScan && (
+                <div className={`h-1.5 ${styles.progressBg} rounded-full overflow-hidden mt-2`}>
+                  <div 
+                    className={`h-full rounded-full ${
+                      latestScan.confidence >= 0.75 ? 'bg-emerald-500' :
+                      latestScan.confidence >= 0.5 ? 'bg-cyan-500' :
+                      'bg-orange-500'
+                    }`}
+                    style={{ width: `${latestScan.confidence * 100}%` }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
