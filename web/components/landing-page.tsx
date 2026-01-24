@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  Zap, Search, ChevronDown, BarChart3, Shield, Sparkles, TrendingUp, Bot,
+  Search, ChevronDown, BarChart3, Shield, Sparkles, TrendingUp, Bot,
   Eye, Brain, Gauge, Chrome, History, Briefcase, Upload, Cpu, LineChart,
   Check, X, Menu, ArrowRight, Play
 } from 'lucide-react'
+import { LiquiLogoIcon } from './liqui-logo'
 import { useTheme } from 'next-themes'
 import LoginModal from './login-modal'
 import { ThemeToggle } from './theme-toggle'
@@ -166,9 +167,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-xl flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
+              <LiquiLogoIcon size={32} className={isDark ? "text-white" : "text-gray-900"} />
               <span className={isDark ? "text-xl font-bold text-white" : "text-xl font-bold text-gray-900"}>LiquiSight</span>
             </div>
 
@@ -772,9 +771,7 @@ export default function LandingPage({ onLogin }: LandingPageProps) {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-lg flex items-center justify-center">
-                  <Zap className="w-4 h-4 text-white" />
-                </div>
+                <LiquiLogoIcon size={28} className={isDark ? "text-white" : "text-gray-900"} />
                 <span className={isDark ? "font-semibold text-white" : "font-semibold text-gray-900"}>LiquiSight</span>
               </div>
               <p className={isDark ? "text-sm text-gray-500" : "text-sm text-gray-500"}>

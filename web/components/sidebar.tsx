@@ -1,7 +1,8 @@
 'use client'
 
-import { BarChart3, History, Wallet, Zap, ChevronRight, Sparkles, LogOut } from 'lucide-react'
+import { BarChart3, History, Wallet, ChevronRight, Sparkles, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { LiquiLogoIcon } from './liqui-logo'
 
 interface SidebarProps {
   currentPage: string
@@ -28,7 +29,7 @@ export default function Sidebar({ currentPage, onNavigate, onLogout }: SidebarPr
           <div className="relative">
             <div className="absolute inset-0 bg-primary/30 rounded-xl blur-md" />
             <div className="relative w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-lg">
-              <Zap className="w-5 h-5 text-primary-foreground" />
+              <LiquiLogoIcon size={22} className="text-primary-foreground" />
             </div>
           </div>
           <div>

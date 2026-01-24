@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Zap, Mail, ArrowRight, Loader2 } from 'lucide-react'
+import { X, Mail, ArrowRight, Loader2 } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { LiquiLogoIcon } from './liqui-logo'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -111,7 +112,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-10">
               <div className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
-                <Zap className="w-5 h-5 text-white" />
+                <LiquiLogoIcon size={22} className="text-white" />
               </div>
               <span className="text-xl font-bold text-white">LiquiSight</span>
             </div>
