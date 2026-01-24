@@ -1,0 +1,23 @@
+# Unified ignores for the repo root
+
+# env
+.env
+.env.*
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# node
+node_modules/
+
+# next
+.next/
+out/
+
+# misc
+.DS_Store
+Thumbs.db
+*.log

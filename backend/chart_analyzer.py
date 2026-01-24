@@ -4,7 +4,8 @@ Analyzes stock chart images and returns structured insights.
 
 Supports multiple AI providers with automatic fallback:
 1. OpenRouter (if OPENROUTER_API_KEY is set)
-2. Google Gemini (if GEMINI_API_KEY is set)
+2. OpenAI (if OPENAI_API_KEY is set)
+3. Google Gemini (if GEMINI_API_KEY is set)
 3. Demo mode (no API required)
 """
 
@@ -17,6 +18,15 @@ import random
 from typing import Optional, TypedDict, Literal
 
 from PIL import Image
+
+
+def _debug_enabled() -> bool:
+    return os.environ.get("LIQUISIGHT_DEBUG", "").strip() in {"1", "true", "True", "yes", "on"}
+
+
+def _debug_log(message: str) -> None:
+    if _debug_enabled():
+        print(f"[LiquiSight] {message}", flush=True)
 
 
 class AnalysisResult(TypedDict):
@@ -212,9 +222,11 @@ def _analyze_with_openrouter(image: Image.Image, stock_name: Optional[str]) -> O
             return None
         
         base_url = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-        model = os.environ.get("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+        # Use a free, multimodal model by default so local dev works without credits.
+        model = os.environ.get("OPENROUTER_MODEL", "qwen/qwen-2.5-vl-7b-instruct:free")
 
-        client = OpenAI(api_key=api_key, base_url=base_url)
+        timeout_s = float(os.environ.get("OPENROUTER_TIMEOUT_S", os.environ.get("AI_REQUEST_TIMEOUT_S", "20")))
+        client = OpenAI(api_key=api_key, base_url=base_url, timeout=timeout_s, max_retries=1)
         
         image_base64 = _encode_image_to_base64(image)
         user_message = f"Analyze this stock chart for {stock_name}." if stock_name else "Analyze this stock chart image."
@@ -247,7 +259,8 @@ def _analyze_with_openrouter(image: Image.Image, stock_name: Optional[str]) -> O
         parsed = _parse_ai_response(ai_response)
         return _validate_result(parsed)
         
-    except Exception:
+    except Exception as e:
+        _debug_log(f"openrouter analyze failed: {type(e).__name__}: {e}")
         return None
 
 
@@ -288,7 +301,74 @@ def _analyze_with_gemini(image: Image.Image, stock_name: Optional[str]) -> Optio
         parsed = _parse_ai_response(ai_response)
         return _validate_result(parsed)
         
-    except Exception:
+    except Exception as e:
+        _debug_log(f"gemini analyze failed: {type(e).__name__}: {e}")
+        return None
+
+
+def _analyze_with_openai(image: Image.Image, stock_name: Optional[str]) -> Optional[dict]:
+    """Analyze chart using OpenAI's vision models.
+
+    Uses OPENAI_API_KEY and optionally OPENAI_MODEL (defaults to gpt-4o-mini).
+    Returns validated result dict or None on failure.
+    """
+
+    try:
+        from openai import OpenAI
+
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            return None
+
+        model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+
+        timeout_s = float(os.environ.get("OPENAI_TIMEOUT_S", os.environ.get("AI_REQUEST_TIMEOUT_S", "60")))
+        client = OpenAI(api_key=api_key, timeout=timeout_s, max_retries=1)
+
+        image_base64 = _encode_image_to_base64(image)
+        user_message = f"Analyze this stock chart for {stock_name}." if stock_name else "Analyze this stock chart image."
+
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_message},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{image_base64}",
+                        },
+                    },
+                ],
+            },
+        ]
+
+        # Prefer strict JSON responses when supported.
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=500,
+                temperature=0.3,
+                response_format={"type": "json_object"},
+            )
+        except Exception:
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=500,
+                temperature=0.3,
+            )
+
+        ai_response = response.choices[0].message.content
+        if not ai_response:
+            return None
+
+        parsed = _parse_ai_response(ai_response)
+        return _validate_result(parsed)
+    except Exception as e:
+        _debug_log(f"openai analyze failed: {type(e).__name__}: {e}")
         return None
 
 
@@ -311,11 +391,38 @@ def analyze_chart(image: Image.Image, stock_name: Optional[str] = None) -> Analy
         }
     """
     final_stock_name = stock_name if stock_name else "Unknown"
+
+    enable_gemini_fallback = os.environ.get("ENABLE_GEMINI_FALLBACK", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+    enable_demo_fallback = os.environ.get("ENABLE_DEMO_FALLBACK", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+    providers_configured = bool(os.environ.get("OPENROUTER_API_KEY")) or bool(os.environ.get("OPENAI_API_KEY")) or (
+        enable_gemini_fallback and bool(os.environ.get("GEMINI_API_KEY"))
+    )
+
+    _debug_log(
+        "analyze_chart: "
+        f"stock_name={final_stock_name!r} "
+        f"keys={{openrouter:{bool(os.environ.get('OPENROUTER_API_KEY'))}, openai:{bool(os.environ.get('OPENAI_API_KEY'))}, gemini:{bool(os.environ.get('GEMINI_API_KEY'))}}} "
+        f"enable_gemini_fallback={enable_gemini_fallback} "
+        f"enable_demo_fallback={enable_demo_fallback}"
+    )
     
     # Try OpenRouter first (if API key is set)
     if os.environ.get("OPENROUTER_API_KEY"):
         result = _analyze_with_openrouter(image, stock_name)
         if result:
+            _debug_log("analyze_chart: provider=openrouter")
             return {
                 "stock_name": final_stock_name,
                 "trend": result["trend"],
@@ -323,11 +430,27 @@ def analyze_chart(image: Image.Image, stock_name: Optional[str] = None) -> Analy
                 "confidence": result["confidence"],
                 "explanation": result["explanation"],
             }
+        _debug_log("analyze_chart: provider=openrouter failed, falling back")
+
+    # Try OpenAI next (if API key is set)
+    if os.environ.get("OPENAI_API_KEY"):
+        result = _analyze_with_openai(image, stock_name)
+        if result:
+            _debug_log("analyze_chart: provider=openai")
+            return {
+                "stock_name": final_stock_name,
+                "trend": result["trend"],
+                "risk": result["risk"],
+                "confidence": result["confidence"],
+                "explanation": result["explanation"],
+            }
+        _debug_log("analyze_chart: provider=openai failed, falling back")
     
-    # Try Gemini second (if API key is set)
-    if os.environ.get("GEMINI_API_KEY"):
+    # Try Gemini next only when explicitly enabled.
+    if enable_gemini_fallback and os.environ.get("GEMINI_API_KEY"):
         result = _analyze_with_gemini(image, stock_name)
         if result:
+            _debug_log("analyze_chart: provider=gemini")
             return {
                 "stock_name": final_stock_name,
                 "trend": result["trend"],
@@ -335,6 +458,15 @@ def analyze_chart(image: Image.Image, stock_name: Optional[str] = None) -> Analy
                 "confidence": result["confidence"],
                 "explanation": result["explanation"],
             }
+        _debug_log("analyze_chart: provider=gemini failed, falling back")
     
-    # Fall back to demo mode
-    return _get_demo_response(final_stock_name)
+    # Fall back to demo mode only when explicitly enabled OR when nothing is configured.
+    if enable_demo_fallback or not providers_configured:
+        _debug_log("analyze_chart: provider=demo")
+        return _get_demo_response(final_stock_name)
+
+    # Providers were configured but all failed: fail loudly so the UI doesn't look like it's using mock data.
+    raise RuntimeError(
+        "All AI providers failed. Enable LIQUISIGHT_DEBUG=1 to see provider errors in the backend logs, "
+        "or set ENABLE_DEMO_FALLBACK=1 to allow demo responses."
+    )

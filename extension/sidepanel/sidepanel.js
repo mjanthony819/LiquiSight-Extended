@@ -1,6 +1,4 @@
 // LiquiSight Side Panel Controller
-const GEMINI_API_KEY = 'AIzaSyAzWeGHn-0doDZHDYbZ2k6BFHBIUsT39nE';
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 
 class LiquiSightPanel {
   constructor() {
@@ -180,28 +178,6 @@ class LiquiSightPanel {
     this.showTypingIndicator();
 
     try {
-      const requestBody = {
-        contents: [{
-          parts: []
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        }
-      };
-
-      // Add image if provided
-      if (imageBase64) {
-        requestBody.contents[0].parts.push({
-          inlineData: {
-            mimeType: "image/png",
-            data: imageBase64
-          }
-        });
-      }
-
       // Create the prompt
       const systemContext = `You are LiquiSight, an AI Financial Copilot assistant. You help users analyze financial content, stock charts, market data, and provide insights. Be concise, helpful, and use bullet points when listing multiple items. Format important numbers and percentages clearly.`;
       
@@ -209,23 +185,30 @@ class LiquiSightPanel {
         ? `${systemContext}\n\nThe user has shared a screenshot. Analyze this image and identify any financial information, stock data, charts, prices, tickers, or market indicators visible. Provide clear insights and observations. If no financial data is found, describe what you see and offer to help with financial questions.\n\nUser message: ${message || 'What can you tell me about this?'}`
         : `${systemContext}\n\nUser: ${message}`;
 
-      requestBody.contents[0].parts.push({ text: prompt });
-
-      const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
+      const data = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          {
+            action: 'sendChatMessage',
+            message: prompt,
+            context: this.tabTitle?.textContent || undefined,
+            imageBase64: imageBase64 || undefined,
+            imageMime: 'image/png'
+          },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+              return;
+            }
+            if (!response?.ok) {
+              reject(new Error(response?.error || 'Chat request failed'));
+              return;
+            }
+            resolve(response.result);
+          }
+        );
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API Error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const aiMessage = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, I could not process that request.';
+      const aiMessage = data?.reply || 'Sorry, I could not process that request.';
       
       this.hideTypingIndicator();
       this.addMessage('assistant', aiMessage);
@@ -236,7 +219,7 @@ class LiquiSightPanel {
       this.addMessage('assistant', `
         <div class="error-message">
           <strong>⚠️ Error:</strong> ${error.message}<br><br>
-          <small>Please check your API key or try again later.</small>
+          <small>Please check that the backend is running on http://127.0.0.1:8000 and that OPENROUTER_API_KEY is set in the root .env.</small>
         </div>
       `, true);
     }
