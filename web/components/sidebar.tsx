@@ -1,6 +1,7 @@
 'use client'
 
 import { BarChart3, History, Zap, ChevronRight, Sparkles, LogOut } from 'lucide-react'
+import { signOut } from 'next-auth/react'
 
 interface SidebarProps {
   currentPage: string
@@ -77,15 +78,16 @@ export default function Sidebar({ currentPage, onNavigate, onLogout }: SidebarPr
       {/* Footer */}
       <div className="relative p-4 border-t border-sidebar-border/50">
         {/* Logout Button */}
-        {onLogout && (
-          <button
-            onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/10 rounded-xl transition-all text-sm"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </button>
-        )}
+        <button
+          onClick={() => {
+            onLogout?.()
+            signOut({ callbackUrl: '/' })
+          }}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/10 rounded-xl transition-all text-sm"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Sign Out</span>
+        </button>
       </div>
     </div>
   )

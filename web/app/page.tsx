@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { ScansProvider } from '@/context/scans-context'
 import Sidebar from '@/components/sidebar'
 import Dashboard from '@/components/dashboard'
@@ -9,15 +10,14 @@ import NewScan from '@/components/new-scan'
 import LandingPage from '@/components/landing-page'
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { data: session, status } = useSession()
   const [currentPage, setCurrentPage] = useState('dashboard')
 
   const handleLogin = () => {
-    setIsAuthenticated(true)
+    // This is now handled by NextAuth - the session will update automatically
   }
 
   const handleLogout = () => {
-    setIsAuthenticated(false)
     setCurrentPage('dashboard')
   }
 
@@ -36,8 +36,17 @@ export default function Home() {
     }
   }
 
+  // Show loading state while checking session
+  if (status === 'loading') {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
   // Show landing page if not authenticated
-  if (!isAuthenticated) {
+  if (!session) {
     return <LandingPage onLogin={handleLogin} />
   }
 
