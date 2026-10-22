@@ -268,7 +268,11 @@ async def analyze(
     
     # Read and convert uploaded file to PIL Image
     contents = await upload.read()
-    pil_image = Image.open(io.BytesIO(contents))
+    try:
+        pil_image = Image.open(io.BytesIO(contents))
+        pil_image.load()  # decode now so truncated files fail here, not mid-analysis
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Uploaded file is not a valid image") from e
     
     # Analyze the chart using the AI analyzer
     # `context` is accepted for extension clients; backend analysis contract stays the same.
