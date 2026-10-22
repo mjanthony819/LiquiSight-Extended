@@ -83,6 +83,16 @@ def test_analyze_runtime_error_becomes_502(client, monkeypatch):
     assert r.status_code == 502 and "all providers down" in r.json()["detail"]
 
 
+def test_analyze_rejects_non_image_upload(client):
+    r = client.post("/analyze", files={"file": ("notes.txt", b"definitely not an image", "text/plain")})
+    assert r.status_code == 400
+
+
+def test_analyze_rejects_truncated_image(client):
+    r = client.post("/analyze", files={"file": ("chart.png", _png_bytes()[:48], "image/png")})
+    assert r.status_code == 400
+
+
 def test_extract_first_json_object_handles_nesting_and_strings():
     assert _extract_first_json_object('pre {"a": {"b": "}"}} post') == '{"a": {"b": "}"}}'
     with pytest.raises(ValueError):
