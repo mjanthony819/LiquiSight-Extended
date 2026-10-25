@@ -1,4 +1,5 @@
 """API contract tests for the LiquiSight backend. No AI keys required."""
+import base64
 import io
 
 import pytest
@@ -7,6 +8,7 @@ from PIL import Image
 
 import main
 from chart_analyzer import (
+    _encode_image_to_base64,
     _extract_first_json_object,
     _get_demo_response,
     _parse_ai_response,
@@ -122,3 +124,16 @@ def test_demo_response_is_deterministic_per_stock():
     assert a["stock_name"] == "TCS"
     assert 0.30 <= a["confidence"] <= 0.40
     assert a["trend"] in {"Uptrend", "Downtrend", "Sideways"}
+
+
+def test_encode_image_converts_modes_and_caps_size():
+    big = Image.new("RGBA", (3000, 2000), (10, 200, 30, 128))
+    out = Image.open(io.BytesIO(base64.b64decode(_encode_image_to_base64(big))))
+    assert out.format == "PNG" and out.mode == "RGB"  # alpha dropped, vision models get plain RGB
+    assert max(out.size) <= 1024  # requests stay small and consistent
+
+
+def test_encode_image_leaves_small_images_alone():
+    small = Image.new("L", (100, 80), 200)
+    out = Image.open(io.BytesIO(base64.b64decode(_encode_image_to_base64(small))))
+    assert out.size == (100, 80)
