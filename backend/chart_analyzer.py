@@ -5,8 +5,8 @@ Analyzes stock chart images and returns structured insights.
 Supports multiple AI providers with automatic fallback:
 1. OpenRouter (if OPENROUTER_API_KEY is set)
 2. OpenAI (if OPENAI_API_KEY is set)
-3. Google Gemini (if GEMINI_API_KEY is set)
-3. Demo mode (no API required)
+3. Google Gemini (if GEMINI_API_KEY is set and ENABLE_GEMINI_FALLBACK is on)
+4. Demo mode (no API required)
 """
 
 import base64
