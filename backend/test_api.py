@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 import main
+import chart_analyzer as ca
 from chart_analyzer import (
     _encode_image_to_base64,
     _extract_first_json_object,
@@ -137,3 +138,62 @@ def test_encode_image_leaves_small_images_alone():
     small = Image.new("L", (100, 80), 200)
     out = Image.open(io.BytesIO(base64.b64decode(_encode_image_to_base64(small))))
     assert out.size == (100, 80)
+
+
+def _chart():
+    return Image.new("RGB", (64, 48), (30, 90, 160))
+
+
+def test_analyze_chart_uses_demo_when_nothing_configured(monkeypatch):
+    for key in ("OPENROUTER_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY"):
+        monkeypatch.delenv(key, raising=False)
+    out = ca.analyze_chart(_chart(), "TCS")
+    assert out["stock_name"] == "TCS"
+    assert 0.30 <= out["confidence"] <= 0.40  # demo band: the UI can tell it apart from a real read
+
+
+def test_analyze_chart_skips_gemini_unless_explicitly_enabled(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("GEMINI_API_KEY", "gm-test")
+    calls = []
+
+    def gemini(image, stock_name=None):
+        calls.append("gemini")
+        return {"trend": "Uptrend", "risk": "Low", "confidence": 0.9, "explanation": "x"}
+
+    monkeypatch.setattr(ca, "_analyze_with_gemini", gemini)
+    out = ca.analyze_chart(_chart(), "TCS")  # fallback flag off: gemini key alone is not enough
+    assert calls == [] and out["confidence"] <= 0.40  # fell through to demo instead
+    monkeypatch.setenv("ENABLE_GEMINI_FALLBACK", "1")
+    out = ca.analyze_chart(_chart(), "TCS")
+    assert calls == ["gemini"] and out["confidence"] == 0.9
+
+
+def test_analyze_chart_openai_beats_gemini_in_fallback_order(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    monkeypatch.setenv("GEMINI_API_KEY", "gm-test")
+    monkeypatch.setenv("ENABLE_GEMINI_FALLBACK", "1")
+    calls = []
+    monkeypatch.setattr(ca, "_analyze_with_openai",
+                        lambda image, stock_name=None: calls.append("openai") or
+                        {"trend": "Sideways", "risk": "Low", "confidence": 0.8, "explanation": "x"})
+    monkeypatch.setattr(ca, "_analyze_with_gemini",
+                        lambda image, stock_name=None: calls.append("gemini") or
+                        {"trend": "Uptrend", "risk": "High", "confidence": 0.9, "explanation": "y"})
+    out = ca.analyze_chart(_chart())
+    assert calls == ["openai"] and out["trend"] == "Sideways"  # first working provider wins
+
+
+def test_analyze_chart_raises_loudly_when_providers_configured_but_all_fail(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("ENABLE_DEMO_FALLBACK", raising=False)
+    monkeypatch.setattr(ca, "_analyze_with_openrouter", lambda image, stock_name=None: None)
+    with pytest.raises(RuntimeError):
+        ca.analyze_chart(_chart())
+    monkeypatch.setenv("ENABLE_DEMO_FALLBACK", "1")
+    out = ca.analyze_chart(_chart())  # explicit opt-in: demo is acceptable again
+    assert 0.30 <= out["confidence"] <= 0.40
