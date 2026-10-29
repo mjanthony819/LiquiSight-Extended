@@ -197,3 +197,47 @@ def test_analyze_chart_raises_loudly_when_providers_configured_but_all_fail(monk
     monkeypatch.setenv("ENABLE_DEMO_FALLBACK", "1")
     out = ca.analyze_chart(_chart())  # explicit opt-in: demo is acceptable again
     assert 0.30 <= out["confidence"] <= 0.40
+
+
+def test_chat_returns_openrouter_reply_when_configured(client, monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")
+    monkeypatch.setattr(main, "_chat_with_openrouter", lambda message, **kw: "router reply")
+    monkeypatch.setattr(main, "_chat_with_openai", lambda message, **kw: "openai reply")
+    r = client.post("/chat", json={"message": "hi"})
+    assert r.status_code == 200 and r.json()["reply"] == "router reply"
+
+
+def test_chat_falls_back_to_openai_on_openrouter_failure(client, monkeypatch):
+    from fastapi import HTTPException
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+
+    def boom(message, **kw):
+        raise HTTPException(status_code=402, detail="Insufficient credits")
+    monkeypatch.setattr(main, "_chat_with_openrouter", boom)
+    monkeypatch.setattr(main, "_chat_with_openai", lambda message, **kw: "openai reply")
+    r = client.post("/chat", json={"message": "hi"})
+    assert r.status_code == 200 and r.json()["reply"] == "openai reply"
+
+
+def test_chat_does_not_fall_back_on_client_error(client, monkeypatch):
+    from fastapi import HTTPException
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+
+    def boom(message, **kw):
+        raise HTTPException(status_code=400, detail="model not found")
+    monkeypatch.setattr(main, "_chat_with_openrouter", boom)
+    called = []
+    monkeypatch.setattr(main, "_chat_with_openai", lambda message, **kw: called.append(1) or "x")
+    r = client.post("/chat", json={"message": "hi"})
+    assert r.status_code == 400 and called == []  # a config error surfaces, it does not silently switch providers
+
+
+def test_analyze_accepts_legacy_image_field_name(client, monkeypatch):
+    def fake_analyze(image, stock_name=None):
+        return {"stock_name": "X", "trend": "Sideways", "risk": "Low",
+                "confidence": 0.5, "explanation": "Range-bound."}
+    monkeypatch.setattr(main, "analyze_chart", fake_analyze)
+    r = client.post("/analyze", files={"image": ("chart.png", _png_bytes(), "image/png")})
+    assert r.status_code == 200 and r.json()["trend"] == "Sideways"
