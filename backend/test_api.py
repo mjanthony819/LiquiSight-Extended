@@ -241,3 +241,36 @@ def test_analyze_accepts_legacy_image_field_name(client, monkeypatch):
     monkeypatch.setattr(main, "analyze_chart", fake_analyze)
     r = client.post("/analyze", files={"image": ("chart.png", _png_bytes(), "image/png")})
     assert r.status_code == 200 and r.json()["trend"] == "Sideways"
+
+
+def test_demo_response_risk_mapping_matches_trend():
+    seen = {}
+    for i in range(200):  # seeded by name: find one name per trend, deterministically
+        r = _get_demo_response(f"STOCK{i}")
+        seen.setdefault(r["trend"], r)
+    assert set(seen) == {"Uptrend", "Downtrend", "Sideways"}
+    assert seen["Uptrend"]["risk"] == "Medium"
+    assert seen["Downtrend"]["risk"] == "High"
+    assert seen["Sideways"]["risk"] == "Low"
+    for trend, r in seen.items():
+        assert r["explanation"] in ca._DEMO_EXPLANATIONS[trend]
+
+
+def test_analyze_chart_openrouter_wins_when_configured(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+    calls = []
+    monkeypatch.setattr(ca, "_analyze_with_openrouter",
+                        lambda image, stock_name=None: calls.append("router") or
+                        {"trend": "Uptrend", "risk": "Medium", "confidence": 0.9, "explanation": "x"})
+    monkeypatch.setattr(ca, "_analyze_with_openai",
+                        lambda image, stock_name=None: calls.append("openai") or
+                        {"trend": "Sideways", "risk": "Low", "confidence": 0.5, "explanation": "y"})
+    out = ca.analyze_chart(_chart(), "TCS")
+    assert calls == ["router"] and out["trend"] == "Uptrend"  # first configured provider wins
+
+
+def test_validate_result_parses_numeric_string_confidence():
+    assert _validate_result({"confidence": "0.83"})["confidence"] == 0.83
+    assert _validate_result({"confidence": "-1"})["confidence"] == 0.0   # clamped, not rejected
+    assert _validate_result({"confidence": "1.5"})["confidence"] == 1.0
