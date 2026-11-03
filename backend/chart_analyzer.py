@@ -102,30 +102,20 @@ def _encode_image_to_base64(image: Image.Image) -> str:
     return base64.b64encode(buffer.read()).decode("utf-8")
 
 
-def _extract_first_json_object(text: str) -> str:
-    """Extract the first balanced JSON object from text.
-
-    Handles nested braces and ignores braces inside strings.
-    """
-    start = text.find("{")
-    if start == -1:
-        raise ValueError("No JSON object found")
-
+def _iter_json_objects(text: str):
+    """Yield every balanced {...} span in order, ignoring braces inside strings."""
     depth = 0
     in_string = False
     escape = False
+    start = -1
 
-    for idx in range(start, len(text)):
-        ch = text[idx]
-
+    for idx, ch in enumerate(text):
         if in_string:
             if escape:
                 escape = False
-                continue
-            if ch == "\\":
+            elif ch == "\\":
                 escape = True
-                continue
-            if ch == '"':
+            elif ch == '"':
                 in_string = False
             continue
 
@@ -134,13 +124,23 @@ def _extract_first_json_object(text: str) -> str:
             continue
 
         if ch == "{":
+            if depth == 0:
+                start = idx
             depth += 1
-        elif ch == "}":
+        elif ch == "}" and depth:
             depth -= 1
             if depth == 0:
-                return text[start : idx + 1]
+                yield text[start : idx + 1]
 
-    raise ValueError("Unbalanced JSON object")
+
+def _extract_first_json_object(text: str) -> str:
+    """Extract the first balanced JSON object from text.
+
+    Handles nested braces and ignores braces inside strings.
+    """
+    for span in _iter_json_objects(text):
+        return span
+    raise ValueError("No JSON object found")
 
 
 def _parse_ai_response(response_text: str) -> dict:
@@ -152,9 +152,13 @@ def _parse_ai_response(response_text: str) -> dict:
         json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", response_text, re.DOTALL)
         if json_match:
             return json.loads(json_match.group(1))
-        # Try to find a balanced JSON object anywhere in the response
-        extracted = _extract_first_json_object(response_text)
-        return json.loads(extracted)
+        # Prose can carry braces before the real answer: take the first span that parses.
+        for candidate in _iter_json_objects(response_text):
+            try:
+                return json.loads(candidate)
+            except json.JSONDecodeError:
+                continue
+        raise ValueError("No JSON object found")
 
 
 def _validate_result(result: dict) -> dict:
