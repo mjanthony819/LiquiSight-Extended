@@ -110,6 +110,17 @@ def test_parse_ai_response_accepts_plain_fenced_and_embedded_json():
     embedded = 'My analysis: {"trend": "Downtrend", "risk": "High"} - hope it helps'
     assert _parse_ai_response(embedded) == {"trend": "Downtrend", "risk": "High"}
 
+def test_parse_ai_response_skips_prose_braces_before_the_real_json():
+    # Regression: prose like {like this} before the actual JSON used to break parsing
+    reply = 'Sure! {this is prose} but the answer is {"trend": "Uptrend"}'
+    assert _parse_ai_response(reply) == {"trend": "Uptrend"}
+    # an earlier valid JSON span wins by document order - the fix preserves that
+    assert _parse_ai_response('{"a": 1} trailing {"trend": "Sideways"}') == {"a": 1}
+    # nothing parseable anywhere still raises
+    with pytest.raises(ValueError):
+        _parse_ai_response('Sure! {just prose} and no JSON at all')
+
+
 
 def test_validate_result_normalizes_to_contract():
     out = _validate_result({"trend": "wild", "risk": "extreme", "confidence": 1.7, "explanation": "  ok  "})
