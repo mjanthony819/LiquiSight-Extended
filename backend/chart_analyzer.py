@@ -151,7 +151,10 @@ def _parse_ai_response(response_text: str) -> dict:
         # Try to extract JSON from markdown code blocks
         json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", response_text, re.DOTALL)
         if json_match:
-            return json.loads(json_match.group(1))
+            try:
+                return json.loads(json_match.group(1))
+            except json.JSONDecodeError:
+                pass  # broken brace pairs inside the fence: fall through to the span scan
         # Prose can carry braces before the real answer: take the first span that parses.
         for candidate in _iter_json_objects(response_text):
             try:
