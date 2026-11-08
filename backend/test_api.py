@@ -120,6 +120,13 @@ def test_parse_ai_response_skips_prose_braces_before_the_real_json():
     with pytest.raises(ValueError):
         _parse_ai_response('Sure! {just prose} and no JSON at all')
 
+def test_parse_ai_response_falls_back_when_the_fenced_capture_is_broken():
+    # Regression: a fence whose brace-greedy capture is not valid JSON used to raise
+    # raw JSONDecodeError instead of scanning the spans inside it.
+    reply = '```\n{"a": } {"trend": "Uptrend"}\n```'
+    assert _parse_ai_response(reply) == {"trend": "Uptrend"}
+
+
 
 
 def test_validate_result_normalizes_to_contract():
