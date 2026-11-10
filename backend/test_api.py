@@ -292,3 +292,7 @@ def test_validate_result_parses_numeric_string_confidence():
     assert _validate_result({"confidence": "0.83"})["confidence"] == 0.83
     assert _validate_result({"confidence": "-1"})["confidence"] == 0.0   # clamped, not rejected
     assert _validate_result({"confidence": "1.5"})["confidence"] == 1.0
+
+def test_iter_json_objects_yields_balanced_spans_and_ignores_string_braces():
+    spans = list(ca._iter_json_objects('a {"x": "}"} b {"y": 1} c {unbalanced'))
+    assert spans == ['{"x": "}"}', '{"y": 1}']  # the unbalanced tail is skipped, not yielded
