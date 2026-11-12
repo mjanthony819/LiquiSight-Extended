@@ -169,12 +169,14 @@ def _validate_result(result: dict) -> dict:
     valid_trends = {"Uptrend", "Downtrend", "Sideways"}
     trend = result.get("trend", "Sideways")
     if trend not in valid_trends:
-        trend = "Sideways"
-    
+        # Models often answer "uptrend" or " Uptrend ": match case-insensitively so a
+        # valid answer is not silently flipped to the Sideways default.
+        trend = {t.lower(): t for t in valid_trends}.get(str(trend).strip().lower(), "Sideways")
+
     valid_risks = {"Low", "Medium", "High"}
     risk = result.get("risk", "Medium")
     if risk not in valid_risks:
-        risk = "Medium"
+        risk = {r.lower(): r for r in valid_risks}.get(str(risk).strip().lower(), "Medium")
     
     confidence = result.get("confidence", 0.5)
     try:
