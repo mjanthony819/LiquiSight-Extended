@@ -288,6 +288,13 @@ def test_analyze_chart_openrouter_wins_when_configured(monkeypatch):
     assert calls == ["router"] and out["trend"] == "Uptrend"  # first configured provider wins
 
 
+def test_validate_result_matches_trend_and_risk_case_insensitively():
+    # models often answer "uptrend" or " HIGH ": a valid answer must not be flipped to the default
+    out = ca._validate_result({"trend": "uptrend", "risk": " HIGH ", "confidence": 0.9, "explanation": "x"})
+    assert out["trend"] == "Uptrend" and out["risk"] == "High"
+    out = ca._validate_result({"trend": "garbage", "risk": None, "confidence": 0.9, "explanation": "x"})
+    assert out["trend"] == "Sideways" and out["risk"] == "Medium"
+
 def test_validate_result_parses_numeric_string_confidence():
     assert _validate_result({"confidence": "0.83"})["confidence"] == 0.83
     assert _validate_result({"confidence": "-1"})["confidence"] == 0.0   # clamped, not rejected
