@@ -64,7 +64,7 @@ export default function Profile() {
           <div className="flex items-start gap-6">
             {/* Profile Picture */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-2xl overflow-hidden bg-muted border-2 border-primary/20">
+              <div className="w-24 h-24 rounded overflow-hidden bg-muted border-2 border-primary/20">
                 {user?.image ? (
                   <img
                     src={user.image}
@@ -72,7 +72,7 @@ export default function Profile() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary/70">
+                  <div className="w-full h-full flex items-center justify-center bg-primary">
                     <User className="w-10 h-10 text-primary-foreground" />
                   </div>
                 )}
@@ -107,7 +107,7 @@ export default function Profile() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="p-4 border border-border/50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center">
                 <BarChart3 className="w-5 h-5 text-primary" />
               </div>
               <div>
@@ -119,7 +119,7 @@ export default function Profile() {
 
           <Card className="p-4 border border-border/50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded bg-green-500/10 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-green-500" />
               </div>
               <div>
@@ -131,7 +131,7 @@ export default function Profile() {
 
           <Card className="p-4 border border-border/50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded bg-destructive/10 flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5 text-destructive" />
               </div>
               <div>
@@ -143,7 +143,7 @@ export default function Profile() {
 
           <Card className="p-4 border border-border/50">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+              <div className="w-10 h-10 rounded bg-accent/10 flex items-center justify-center">
                 <History className="w-5 h-5 text-accent" />
               </div>
               <div>
@@ -205,7 +205,7 @@ export default function Profile() {
                   htmlFor="notifications"
                   className="w-11 h-6 bg-muted rounded-full cursor-pointer peer-checked:bg-primary transition-colors flex items-center peer-checked:justify-end justify-start p-1"
                 >
-                  <span className="w-4 h-4 bg-white rounded-full shadow-sm" />
+                  <span className="w-4 h-4 bg-white rounded-full " />
                 </label>
               </div>
             </div>
