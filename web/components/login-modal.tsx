@@ -47,11 +47,11 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
 
   // Theme-aware styles
   const styles = {
-    backdrop: isDark ? "bg-black/50 backdrop-blur-sm" : "bg-black/30 backdrop-blur-sm",
+    backdrop: isDark ? "bg-black/50 " : "bg-black/30 ",
     modal: isDark 
-      ? "bg-[#0d1117] rounded-3xl shadow-2xl border border-white/10"
-      : "bg-white rounded-3xl shadow-2xl border border-gray-200",
-    rightPanel: isDark ? "bg-[#0d1117]" : "bg-white",
+      ? "bg-[#20251f] rounded  border border-white/10"
+      : "bg-white rounded  border border-gray-200",
+    rightPanel: isDark ? "bg-[#20251f]" : "bg-white",
     closeBtn: isDark 
       ? "text-gray-500 hover:text-gray-300 hover:bg-white/10"
       : "text-gray-400 hover:text-gray-600 hover:bg-gray-100",
@@ -64,10 +64,10 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
     dividerText: isDark ? "text-gray-500" : "text-gray-400",
     label: isDark ? "text-gray-300" : "text-gray-700",
     input: isDark 
-      ? "bg-white/5 border border-white/20 text-white placeholder:text-gray-500 focus:ring-indigo-500"
-      : "bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-indigo-500",
+      ? "bg-white/5 border border-white/20 text-white placeholder:text-gray-500 focus:ring-accent"
+      : "bg-gray-50 border border-gray-200 text-gray-900 placeholder:text-gray-400 focus:ring-accent",
     inputIcon: isDark ? "text-gray-500" : "text-gray-400",
-    termsLink: isDark ? "text-indigo-400" : "text-indigo-600",
+    termsLink: isDark ? "text-accent" : "text-accent",
   }
 
   return (
@@ -81,7 +81,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
       {/* Modal */}
       <div className={`relative w-full max-w-4xl ${styles.modal} overflow-hidden flex animate-in zoom-in-95 fade-in duration-200`}>
         {/* Left Panel - Branding */}
-        <div className="hidden md:flex flex-col justify-between w-1/2 p-10 bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-600 relative overflow-hidden">
+        <div className="hidden md:flex flex-col justify-between w-1/2 p-10 bg-sidebar relative overflow-hidden">
           {/* Pattern overlay */}
           <div className="absolute inset-0 opacity-30">
             <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -117,7 +117,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
           {/* Content */}
           <div className="relative z-10">
             <div className="flex items-center gap-2 mb-10">
-              <div className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-white/20  rounded flex items-center justify-center">
                 <Zap className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-white">LiquiSight</span>
@@ -128,7 +128,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
               <br />
               Investing.
             </h2>
-            <p className="text-indigo-100 text-lg">
+            <p className="text-accent text-lg">
               Get insights that matter with our advanced financial AI.
             </p>
           </div>
@@ -136,13 +136,13 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
           {/* Bottom decoration */}
           <div className="relative z-10">
             <div className="w-12 h-1 bg-white/50 rounded mb-4" />
-            <p className="text-indigo-200 text-sm">Trusted by 10,000+ investors</p>
+            <p className="text-accent text-sm">Local prototype - bring your own provider key</p>
           </div>
 
           {/* Floating elements */}
-          <div className="absolute top-20 right-10 w-16 h-16 bg-white/10 rounded-2xl rotate-12" />
-          <div className="absolute bottom-32 right-20 w-12 h-12 bg-cyan-400/30 rounded-xl -rotate-6" />
-          <div className="absolute top-1/2 right-8 w-8 h-8 bg-purple-300/20 rounded-lg rotate-45" />
+          <div className="absolute top-20 right-10 w-16 h-16 bg-white/10 rounded rotate-12" />
+          <div className="absolute bottom-32 right-20 w-12 h-12 bg-accent/30 rounded -rotate-6" />
+          <div className="absolute top-1/2 right-8 w-8 h-8 bg-accent/20 rounded-lg rotate-45" />
         </div>
 
         {/* Right Panel - Login Form */}
@@ -157,13 +157,13 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
 
           <div className="max-w-sm mx-auto">
             <h2 className={`text-2xl font-bold ${styles.heading} mb-2`}>Welcome to LiquiSight</h2>
-            <p className={`${styles.subtext} mb-8`}>Sign in to access your dashboard</p>
+            <p className={`${styles.subtext} mb-8`}>Demo sign-in: any email continues</p>
 
             {/* Google Login */}
             <button
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className={`w-full flex items-center justify-center gap-3 px-4 py-3 ${styles.googleBtn} rounded-xl transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`w-full flex items-center justify-center gap-3 px-4 py-3 ${styles.googleBtn} rounded transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -187,7 +187,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
                       fill="#EA4335"
                     />
                   </svg>
-                  Continue with Google
+                  Continue with Google (demo)
                 </>
               )}
             </button>
@@ -211,7 +211,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className={`w-full pl-12 pr-4 py-3 ${styles.input} rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                  className={`w-full pl-12 pr-4 py-3 ${styles.input} rounded focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
                 />
               </div>
             </div>
@@ -220,7 +220,7 @@ export default function LoginModal({ isOpen, onClose, onLogin }: LoginModalProps
             <button
               onClick={handleContinue}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-primary hover:opacity-90 text-primary-foreground font-semibold rounded transition-all    disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
