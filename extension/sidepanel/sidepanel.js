@@ -93,8 +93,8 @@ class LiquiSightPanel {
     if (role === 'assistant') {
       avatar.innerHTML = `
         <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 28L15 18L22 24L32 12" stroke="#00D4FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="32" cy="12" r="4" fill="#00D4FF"/>
+          <path d="M8 28L15 18L22 24L32 12" stroke="#c3ee69" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="32" cy="12" r="4" fill="#c3ee69"/>
         </svg>
       `;
     } else {
@@ -138,8 +138,8 @@ class LiquiSightPanel {
     typingDiv.innerHTML = `
       <div class="message-avatar">
         <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 28L15 18L22 24L32 12" stroke="#00D4FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="32" cy="12" r="4" fill="#00D4FF"/>
+          <path d="M8 28L15 18L22 24L32 12" stroke="#c3ee69" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="32" cy="12" r="4" fill="#c3ee69"/>
         </svg>
       </div>
       <div class="message-content">
@@ -306,8 +306,8 @@ class LiquiSightPanel {
       <div class="message assistant">
         <div class="message-avatar">
           <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M8 28L15 18L22 24L32 12" stroke="#00D4FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="32" cy="12" r="4" fill="#00D4FF"/>
+            <path d="M8 28L15 18L22 24L32 12" stroke="#c3ee69" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="32" cy="12" r="4" fill="#c3ee69"/>
           </svg>
         </div>
         <div class="message-content">
@@ -361,8 +361,8 @@ class LiquiSightPanel {
           if (msg.role === 'assistant') {
             avatar.innerHTML = `
               <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 28L15 18L22 24L32 12" stroke="#00D4FF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="32" cy="12" r="4" fill="#00D4FF"/>
+                <path d="M8 28L15 18L22 24L32 12" stroke="#c3ee69" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="32" cy="12" r="4" fill="#c3ee69"/>
               </svg>
             `;
           } else {
