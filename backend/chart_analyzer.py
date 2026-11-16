@@ -286,7 +286,9 @@ def _analyze_with_gemini(image: Image.Image, stock_name: Optional[str]) -> Optio
             return None
         
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        # gemini-1.5-flash was shut down on 2025-09-29 (ai.google.dev changelog), so the model
+        # is configurable; the default is the current Gemini 3 Flash GA model.
+        model = genai.GenerativeModel(os.environ.get("GEMINI_MODEL", "gemini-3.8-flash"))
         
         # Convert PIL Image for Gemini
         if image.mode not in ("RGB", "L"):
