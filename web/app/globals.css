@@ -3,10 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* 
- * PERFORMANT theme transition - only animate root level 
- * Using will-change and GPU acceleration
- */
 html {
   color-scheme: light;
 }
@@ -15,105 +11,96 @@ html.dark {
   color-scheme: dark;
 }
 
-/* Only transition on specific containers, not all elements */
-html,
-body,
-.bg-background,
-.bg-card,
-.bg-sidebar,
-.bg-muted {
-  transition: background-color 320ms cubic-bezier(0.2, 0, 0, 1), color 320ms cubic-bezier(0.2, 0, 0, 1);
-}
-
 @media (prefers-reduced-motion: reduce) {
   html,
-  body,
-  .bg-background,
-  .bg-card,
-  .bg-sidebar,
-  .bg-muted {
+  body {
     transition: none !important;
   }
 }
 
+/*
+ * LiquiSight palette: charcoal / lime (shared project UI style).
+ * Dark is the default theme. Values match the approved family palette.
+ */
 :root {
-  --background: oklch(0.99 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.55 0.25 260);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.7 0.15 200);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  --success: oklch(0.62 0.197 142.495);
-  --warning: oklch(0.85 0.189 84.429);
+  --background: #f5f6f3;
+  --foreground: #232922;
+  --card: #ffffff;
+  --card-foreground: #232922;
+  --popover: #ffffff;
+  --popover-foreground: #232922;
+  --primary: #292b2a;
+  --primary-foreground: #f5f6f3;
+  --secondary: #eceee8;
+  --secondary-foreground: #232922;
+  --muted: #eceee8;
+  --muted-foreground: #747c72;
+  --accent: #c3ee69;
+  --accent-foreground: #253119;
+  --destructive: #b84036;
+  --destructive-foreground: #b84036;
+  --border: #e3e6df;
+  --input: #e3e6df;
+  --ring: #7da62c;
+  --chart-1: #7da62c;
+  --chart-2: #232922;
+  --chart-3: #9ea798;
+  --chart-4: #d09a35;
+  --chart-5: #b84036;
+  --radius: 5px;
+  --sidebar: #202520;
+  --sidebar-foreground: #d9dfd4;
+  --sidebar-primary: #c3ee69;
+  --sidebar-primary-foreground: #253119;
+  --sidebar-accent: #2c332a;
+  --sidebar-accent-foreground: #d9dfd4;
+  --sidebar-border: #3c443a;
+  --sidebar-ring: #7da62c;
+  --success: #4e7e25;
+  --warning: #d09a35;
 }
 
 .dark {
-  --background: #06080d;
-  --foreground: #f1f5f9;
-  --card: #0d1117;
-  --card-foreground: #f1f5f9;
-  --popover: #0d1117;
-  --popover-foreground: #f1f5f9;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #161b22;
-  --secondary-foreground: #f1f5f9;
-  --muted: #21262d;
-  --muted-foreground: #8b949e;
-  --accent: #22d3ee;
-  --accent-foreground: #06080d;
-  --destructive: #f87171;
-  --destructive-foreground: #fecaca;
-  --border: #21262d;
-  --input: #161b22;
-  --ring: #6366f1;
-  --chart-1: #6366f1;
-  --chart-2: #22d3ee;
-  --chart-3: #a78bfa;
-  --chart-4: #f472b6;
-  --chart-5: #fbbf24;
-  --sidebar: #0d1117;
-  --sidebar-foreground: #f1f5f9;
-  --sidebar-primary: #6366f1;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #22d3ee;
-  --sidebar-accent-foreground: #06080d;
-  --sidebar-border: #21262d;
-  --sidebar-ring: #6366f1;
-  --success: #34d399;
-  --warning: #fbbf24;
+  --background: #20251f;
+  --foreground: #eff3e9;
+  --card: #292f28;
+  --card-foreground: #eff3e9;
+  --popover: #292f28;
+  --popover-foreground: #eff3e9;
+  --primary: #c3ee69;
+  --primary-foreground: #253119;
+  --secondary: #323a30;
+  --secondary-foreground: #eff3e9;
+  --muted: #323a30;
+  --muted-foreground: #a0aa99;
+  --accent: #c3ee69;
+  --accent-foreground: #253119;
+  --destructive: #dc9e8e;
+  --destructive-foreground: #dc9e8e;
+  --border: #3c443a;
+  --input: #47503e;
+  --ring: #c3ee69;
+  --chart-1: #c3ee69;
+  --chart-2: #d9dfd4;
+  --chart-3: #9ea798;
+  --chart-4: #d09a35;
+  --chart-5: #dc9e8e;
+  --sidebar: #171c17;
+  --sidebar-foreground: #d9dfd4;
+  --sidebar-primary: #c3ee69;
+  --sidebar-primary-foreground: #253119;
+  --sidebar-accent: #2c332a;
+  --sidebar-accent-foreground: #d9dfd4;
+  --sidebar-border: #3c443a;
+  --sidebar-ring: #c3ee69;
+  --success: #9cc184;
+  --warning: #d5bd92;
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: 'Geist', 'Geist Fallback', 'Inter', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', ui-monospace, monospace;
+  --font-display: var(--font-serif), Georgia, serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -161,7 +148,22 @@ body,
   }
 }
 
-/* Custom scrollbar */
+/* Serif display headings, matching the shared project style */
+.display,
+h1.display,
+h2.display {
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+/* Thin scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -180,82 +182,46 @@ body,
   background: var(--muted-foreground);
 }
 
-/* Smooth transitions */
+/* Smooth scrolling */
 * {
   scroll-behavior: smooth;
 }
 
-/* Glass morphism effect */
+/* Selected text */
+::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Legacy class names kept so old markup does not break; restyled to the flat palette */
 .glass {
-  background: rgba(13, 17, 23, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--card);
 }
 
-/* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary);
 }
 
-/* Glow effects */
-.glow-primary {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
-}
-
-.glow-accent {
-  box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
-}
-
+.glow-primary,
+.glow-accent,
 .glow-success {
-  box-shadow: 0 0 20px rgba(52, 211, 153, 0.3);
+  box-shadow: none;
 }
 
-/* Animated gradient background */
 .animated-gradient {
-  background: linear-gradient(-45deg, #6366f1, #22d3ee, #a78bfa, #6366f1);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
-}
-
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* Pulse animation */
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
-  }
+  background: var(--background);
 }
 
 .pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+  animation: none;
 }
 
-/* Card hover effect */
 .card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.15s ease;
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  border-color: var(--ring);
 }
 
 /* Shimmer effect for loading */
@@ -272,7 +238,7 @@ body,
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(99, 102, 241, 0.1) 50%,
+    rgba(195, 238, 105, 0.08) 50%,
     transparent 100%
   );
   background-size: 200% 100%;
