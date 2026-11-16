@@ -25,7 +25,7 @@ export default function ScanFilters({
           placeholder="Search by stock name or symbol..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-xl bg-input border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+          className="w-full pl-11 pr-4 py-3 rounded bg-input border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
         />
       </div>
 
@@ -45,10 +45,10 @@ export default function ScanFilters({
             <button
               key={option.value}
               onClick={() => onRiskFilterChange(option.value)}
-              className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 border ${
+              className={`px-4 py-2.5 rounded text-sm font-semibold transition-all duration-200 border ${
                 riskFilter === option.value
                   ? option.value === 'all'
-                    ? 'bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25'
+                    ? 'bg-primary text-primary-foreground border-primary  shadow-primary/25'
                     : option.colorClass
                   : 'bg-muted/50 text-muted-foreground border-transparent hover:bg-muted'
               }`}
