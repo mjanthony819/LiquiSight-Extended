@@ -41,7 +41,7 @@ export function ThemeToggle() {
       disabled={isTransitioning}
       className={`relative w-14 h-7 rounded-full transition-colors duration-200 ease-out ${
         isDark
-          ? 'bg-indigo-600 shadow-lg shadow-indigo-500/30'
+          ? 'bg-accent '
           : 'bg-gray-200 shadow-inner'
       }`}
       aria-label="Toggle theme"
@@ -51,11 +51,11 @@ export function ThemeToggle() {
         className={`absolute left-0.5 top-0.5 w-6 h-6 rounded-full transition-transform duration-300 [transition-timing-function:cubic-bezier(0.2,0,0,1)] flex items-center justify-center will-change-transform ${
           isDark
             ? 'translate-x-7 bg-gray-900'
-            : 'translate-x-0 bg-white shadow-md'
+            : 'translate-x-0 bg-white '
         }`}
       >
         {isDark ? (
-          <Moon className="w-3.5 h-3.5 text-indigo-300" />
+          <Moon className="w-3.5 h-3.5 text-accent" />
         ) : (
           <Sun className="w-3.5 h-3.5 text-amber-500" />
         )}
