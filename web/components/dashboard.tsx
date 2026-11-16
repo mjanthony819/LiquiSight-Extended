@@ -122,7 +122,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
   const CustomTooltip = useCallback(({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null
     return (
-      <div className="bg-popover/95 backdrop-blur-md border border-border/60 rounded-xl px-4 py-3 shadow-xl">
+      <div className="bg-popover/95  border border-border/60 rounded px-4 py-3 ">
         <p className="text-xs font-medium text-muted-foreground mb-2">{payload[0]?.payload?.time || label}</p>
         {payload.map((entry: any, idx: number) => (
           <div key={idx} className="flex items-center justify-between gap-6">
@@ -147,13 +147,16 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
     <div className="flex-1 min-h-screen bg-background">
       <div className="p-6 space-y-6">
         {/* Minimal title row (header strip removed) */}
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold text-foreground flex items-center gap-3">
+            <h1 className="display text-3xl text-foreground flex items-center gap-3">
               Dashboard
               <span className="inline-flex items-center gap-1 text-xs font-semibold text-accent bg-accent/10 border border-accent/20 rounded-full px-2 py-0.5">
                 <Sparkles className="w-3.5 h-3.5" />
                 Scan-driven
+              </span>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground bg-muted/40 border border-border rounded-full px-2 py-0.5">
+                Sample data
               </span>
             </h1>
             <p className="text-sm text-muted-foreground mt-1">Markets overview, charts, and watchlist.</p>
@@ -164,7 +167,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
             <button
               type="button"
               onClick={() => onOpenNewScan?.()}
-              className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold shadow-sm hover:opacity-95 transition"
+              className="inline-flex items-center gap-2 rounded bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold  hover:opacity-95 transition"
             >
               <Plus className="w-4 h-4" />
               New Scan
@@ -175,7 +178,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
         {/* Market strip */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           {marketCards.map((c) => (
-            <Card key={c.name} className="p-4 border border-border/50 bg-card/70 backdrop-blur">
+            <Card key={c.name} className="p-4 border border-border/50 bg-card/70 ">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 {c.name}
               </p>
@@ -204,17 +207,17 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
         {/* Main grid: chart + discover */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           {/* Chart panel */}
-          <Card className="xl:col-span-8 border border-border/50 bg-card/60 backdrop-blur overflow-hidden">
+          <Card className="xl:col-span-8 border border-border/50 bg-card/60  overflow-hidden">
             <div className="p-6 pb-0">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Home • {activeMarketTitle}</p>
                   <div className="flex items-end gap-3 mt-2 flex-wrap">
-                    <h2 className="text-3xl font-bold text-foreground tracking-tight">{headlineValue}</h2>
+                    <h2 className="display text-4xl text-foreground tracking-tight">{headlineValue}</h2>
                     <p className="text-xs text-muted-foreground pb-1">{headlineMeta}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 rounded-xl bg-muted/20 border border-border/50 p-1">
+                <div className="flex items-center gap-1.5 rounded bg-muted/20 border border-border/50 p-1">
                   {(['1D', '5D', '1M', '6M', '1Y', 'MAX'] as const).map((r) => (
                     <button
                       key={r}
@@ -237,8 +240,8 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
               <ChartContainer
                 className="h-[320px] w-full px-3"
                 config={{
-                  a: { label: 'DOW Jones', theme: { light: 'hsl(142 76% 36%)', dark: 'hsl(142 70% 45%)' } },
-                  b: { label: 'S&P 500', theme: { light: 'hsl(221 83% 53%)', dark: 'hsl(217 91% 60%)' } },
+                  a: { label: 'DOW Jones', theme: { light: '#7da62c', dark: '#c3ee69' } },
+                  b: { label: 'S&P 500', theme: { light: '#9ea798', dark: '#9ea798' } },
                 }}
               >
                 <AreaChart
@@ -274,7 +277,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                     axisLine={false}
                     interval={0}
                     tickMargin={10}
-                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
                   />
                   <YAxis
                     hide
@@ -283,7 +286,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                   <Tooltip
                     content={CustomTooltip}
                     cursor={{
-                      stroke: 'hsl(var(--primary))',
+                      stroke: 'var(--primary)',
                       strokeWidth: 1,
                       strokeDasharray: '4 4',
                       strokeOpacity: 0.5,
@@ -299,7 +302,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                     activeDot={{
                       r: 6,
                       fill: 'var(--color-b)',
-                      stroke: 'hsl(var(--background))',
+                      stroke: 'var(--background)',
                       strokeWidth: 3,
                       filter: 'url(#glow)',
                     }}
@@ -316,7 +319,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                     activeDot={{
                       r: 6,
                       fill: 'var(--color-a)',
-                      stroke: 'hsl(var(--background))',
+                      stroke: 'var(--background)',
                       strokeWidth: 3,
                       filter: 'url(#glow)',
                     }}
@@ -329,11 +332,11 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
               {/* Legend */}
               <div className="flex items-center justify-center gap-6 mt-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[hsl(142_76%_36%)] dark:bg-[hsl(142_70%_45%)]" />
+                  <div className="w-3 h-3 rounded-full bg-[#7da62c] dark:bg-[#c3ee69]" />
                   <span className="text-xs font-medium text-muted-foreground">DOW Jones</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[hsl(221_83%_53%)] dark:bg-[hsl(217_91%_60%)]" />
+                  <div className="w-3 h-3 rounded-full bg-[#9ea798]" />
                   <span className="text-xs font-medium text-muted-foreground">S&P 500</span>
                 </div>
               </div>
@@ -341,7 +344,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
           </Card>
 
           {/* Discover panel */}
-          <Card className="xl:col-span-4 border border-border/50 bg-card/60 backdrop-blur overflow-hidden">
+          <Card className="xl:col-span-4 border border-border/50 bg-card/60  overflow-hidden">
             <div className="p-6 border-b border-border/50">
               <div className="flex items-center justify-between">
                 <div>
@@ -378,7 +381,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                     key={`${c.ticker}-${c.title}`}
                     type="button"
                     onClick={() => onScanSelect?.(c.ticker)}
-                    className="group text-left rounded-2xl border border-border/50 bg-background/40 hover:bg-muted/30 hover:border-primary/30 transition-all duration-200 p-4"
+                    className="group text-left rounded border border-border/50 bg-background/40 hover:bg-muted/30 hover:border-primary/30 transition-all duration-200 p-4"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">{c.title}</p>
@@ -393,11 +396,11 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                       </span>
                     </div>
                     <div className="mt-3 h-8 w-full">
-                      <svg viewBox="0 0 100 32" className="h-full w-full" preserveAspectRatio="none">
+                      <svg viewBox="0 0 100 32" className={`h-full w-full ${isPositive ? 'text-success' : 'text-destructive'}`} preserveAspectRatio="none">
                         <defs>
                           <linearGradient id={`spark-${c.ticker}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={isPositive ? 'hsl(142 76% 36%)' : 'hsl(0 84% 60%)'} stopOpacity={0.3} />
-                            <stop offset="100%" stopColor={isPositive ? 'hsl(142 76% 36%)' : 'hsl(0 84% 60%)'} stopOpacity={0.02} />
+                            <stop offset="0%" stopColor='currentColor' stopOpacity={0.3} />
+                            <stop offset="100%" stopColor='currentColor' stopOpacity={0.02} />
                           </linearGradient>
                         </defs>
                         <path
@@ -407,7 +410,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                         <path
                           d={sparkPath}
                           fill="none"
-                          stroke={isPositive ? 'hsl(142 76% 36%)' : 'hsl(0 84% 60%)'}
+                          stroke='currentColor'
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -417,7 +420,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                           cx="100"
                           cy={lastY}
                           r="3"
-                          fill={isPositive ? 'hsl(142 76% 36%)' : 'hsl(0 84% 60%)'}
+                          fill='currentColor'
                           className="animate-pulse"
                         />
                       </svg>
@@ -430,7 +433,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
         </div>
 
         {/* Watchlist table */}
-        <Card className="border border-border/50 bg-card/60 backdrop-blur overflow-hidden">
+        <Card className="border border-border/50 bg-card/60  overflow-hidden">
           <div className="p-4 border-b border-border/50 flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-foreground">Watchlist</p>
@@ -462,7 +465,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/15 flex items-center justify-center">
+                          <div className="w-9 h-9 rounded bg-primary/10 border border-primary/15 flex items-center justify-center">
                             <span className="text-xs font-bold text-primary">{row.name.slice(0, 2).toUpperCase()}</span>
                           </div>
                           <div className="min-w-0">
@@ -478,7 +481,7 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
                         {row.change >= 0 ? '+' : ''}{row.change.toFixed(2)}
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <span className="inline-flex items-center gap-1 rounded-xl bg-muted/20 border border-border/50 px-3 py-1 text-xs font-semibold text-foreground">
+                        <span className="inline-flex items-center gap-1 rounded bg-muted/20 border border-border/50 px-3 py-1 text-xs font-semibold text-foreground">
                           <Trend className={`w-3.5 h-3.5 ${row.trend === 'up' ? 'text-success' : row.trend === 'down' ? 'text-destructive' : 'text-muted-foreground'}`} />
                           {row.score.toFixed(1)}
                         </span>
@@ -503,4 +506,3 @@ export default function Dashboard({ onOpenNewScan, onScanSelect }: DashboardProp
     </div>
   )
 }
-
