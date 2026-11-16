@@ -98,7 +98,7 @@ export default function NewScan({ onBack }: NewScanProps) {
           <div className="mb-8 flex justify-center">
             <div className="relative">
               <div className="absolute inset-0 bg-success/30 rounded-full blur-xl animate-pulse" />
-              <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-success to-success/70 flex items-center justify-center shadow-2xl shadow-success/30">
+              <div className="relative w-20 h-20 rounded-full bg-success flex items-center justify-center  shadow-success/30">
                 <CheckCircle2 className="w-10 h-10 text-white" />
               </div>
             </div>
@@ -119,7 +119,7 @@ export default function NewScan({ onBack }: NewScanProps) {
           </p>
 
           {resultMessage && resultType !== 'success' && (
-            <div className="mb-6 p-4 rounded-xl border border-destructive/30 bg-destructive/5 text-left">
+            <div className="mb-6 p-4 rounded border border-destructive/30 bg-destructive/5 text-left">
               <p className="text-sm font-semibold text-foreground mb-1">
                 {resultType === 'analysis-error' ? 'Analysis error' : 'Save error'}
               </p>
@@ -127,7 +127,7 @@ export default function NewScan({ onBack }: NewScanProps) {
             </div>
           )}
           <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-success to-accent rounded-full animate-pulse" style={{ width: '100%' }} />
+            <div className="h-full bg-accent rounded-full animate-pulse" style={{ width: '100%' }} />
           </div>
         </div>
       </div>
@@ -138,6 +138,7 @@ export default function NewScan({ onBack }: NewScanProps) {
     <div className="flex-1 bg-background min-h-screen">
       {/* Hero Header */}
       <div className="relative overflow-hidden border-b border-border/50">
+        <p className="mx-6 mt-4 text-xs text-muted-foreground">Provider-backed scans send chart inputs to your selected LLM provider. Provider usage fees and privacy terms apply.</p>
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-48 -mt-48" />
         
@@ -152,7 +153,7 @@ export default function NewScan({ onBack }: NewScanProps) {
             </button>
           )}
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25">
+            <div className="w-12 h-12 rounded bg-primary flex items-center justify-center  shadow-primary/25">
               <Sparkles className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
@@ -181,9 +182,8 @@ export default function NewScan({ onBack }: NewScanProps) {
 
           {/* Large Copilot Card */}
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-accent/10 rounded-2xl blur-2xl opacity-50" />
             
-            <Card className="relative bg-gradient-to-br from-card via-card to-card/80 border border-primary/30 hover:border-primary/50 transition-all duration-300 overflow-hidden">
+            <Card className="relative bg-card border border-primary/30 hover:border-primary/50 transition-all duration-300 overflow-hidden">
               <div className="absolute top-0 right-0 w-80 h-80 bg-primary/10 rounded-full blur-[100px] -mr-40 -mt-40" />
               <div className="absolute bottom-0 left-0 w-60 h-60 bg-accent/10 rounded-full blur-[80px] -ml-30 -mb-30" />
 
@@ -192,7 +192,7 @@ export default function NewScan({ onBack }: NewScanProps) {
                 <div className="mb-8 flex justify-center">
                   <div className="relative">
                     <div className="absolute inset-0 bg-primary/20 rounded-full blur-lg animate-pulse" />
-                    <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border-2 border-primary/40 flex items-center justify-center">
+                    <div className="relative w-20 h-20 rounded bg-primary/10 border-2 border-primary/40 flex items-center justify-center">
                       {isWaiting ? (
                         <div className="w-10 h-10 rounded-full border-3 border-primary/30 border-t-primary animate-spin" />
                       ) : (
@@ -211,7 +211,7 @@ export default function NewScan({ onBack }: NewScanProps) {
                     : 'Your copilot is active and monitoring your browser for chart scans.'}
                 </p>
 
-                <button className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-semibold rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-primary/25 hover:scale-[1.02]">
+                <button className="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:opacity-90 text-primary-foreground font-semibold rounded transition-all duration-300  hover:shadow-primary/25 hover:scale-[1.02]">
                   <Zap className="w-5 h-5" />
                   Open Extension
                 </button>
@@ -234,7 +234,7 @@ export default function NewScan({ onBack }: NewScanProps) {
           </div>
 
           {/* Info box */}
-          <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-xl flex items-start gap-3">
+          <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
               <Zap className="w-4 h-4 text-primary" />
             </div>
@@ -249,9 +249,9 @@ export default function NewScan({ onBack }: NewScanProps) {
 
         {/* Divider */}
         <div className="flex items-center gap-6">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="flex-1 h-px bg-border" />
           <span className="text-xs text-muted-foreground uppercase font-bold tracking-wider px-4 py-2 bg-muted/30 rounded-full">or</span>
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="flex-1 h-px bg-border" />
         </div>
 
         {/* SECTION 2: MANUAL SCAN */}
@@ -273,7 +273,7 @@ export default function NewScan({ onBack }: NewScanProps) {
             {/* Image Upload Field */}
             <Card className="bg-card border-2 border-dashed border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group">
               <div className="p-8 text-center">
-                <div className="w-14 h-14 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/10 transition-colors">
+                <div className="w-14 h-14 rounded bg-muted/50 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/10 transition-colors">
                   <ImageIcon className="w-7 h-7 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-2">Upload Chart Image</h3>
@@ -286,7 +286,7 @@ export default function NewScan({ onBack }: NewScanProps) {
                     <img
                       src={uploadedImage || "/placeholder.svg"}
                       alt="Uploaded chart"
-                      className="w-full h-48 object-cover rounded-xl border border-border mb-3"
+                      className="w-full h-48 object-cover rounded border border-border mb-3"
                     />
                     <button
                       onClick={() => {
@@ -302,7 +302,7 @@ export default function NewScan({ onBack }: NewScanProps) {
                 ) : (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="inline-block px-6 py-2.5 bg-primary/10 text-primary font-semibold rounded-xl hover:bg-primary/20 transition-colors"
+                    className="inline-block px-6 py-2.5 bg-primary/10 text-primary font-semibold rounded hover:bg-primary/20 transition-colors"
                   >
                     Choose File
                   </button>
@@ -327,14 +327,14 @@ export default function NewScan({ onBack }: NewScanProps) {
                   placeholder="e.g., AAPL, Apple Inc., TSLA"
                   value={stockName}
                   onChange={(e) => setStockName(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-input border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                  className="w-full px-4 py-3.5 bg-input border border-border rounded text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
                 />
                 <p className="text-xs text-muted-foreground mt-2">Enter the stock ticker or company name</p>
 
                 <button
                   onClick={handleAnalyze}
                   disabled={!stockName || !uploadedImage || isAnalyzing}
-                  className="mt-6 w-full px-6 py-3.5 bg-gradient-to-r from-muted to-muted/80 hover:from-primary hover:to-primary/80 text-foreground hover:text-primary-foreground font-semibold rounded-xl border border-border hover:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
+                  className="mt-6 w-full px-6 py-3.5 bg-muted hover:bg-primary text-foreground hover:text-primary-foreground font-semibold rounded border border-border hover:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   {isAnalyzing ? (
                     <>
@@ -358,7 +358,7 @@ export default function NewScan({ onBack }: NewScanProps) {
         </div>
 
         {/* Disclaimer */}
-        <div className="p-5 bg-accent/5 border border-accent/20 rounded-xl flex items-start gap-4">
+        <div className="p-5 bg-accent/5 border border-accent/20 rounded flex items-start gap-4">
           <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
             <AlertCircle className="w-5 h-5 text-accent" />
           </div>
