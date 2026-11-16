@@ -64,7 +64,7 @@ export default function Portfolio() {
   const LineChartTooltip = useCallback(({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null
     return (
-      <div className="bg-popover/95 backdrop-blur-md border border-border/60 rounded-xl px-4 py-3 shadow-xl">
+      <div className="bg-popover/95  border border-border/60 rounded px-4 py-3 ">
         <p className="text-xs font-medium text-muted-foreground mb-2">{label}</p>
         {payload.map((entry: any, idx: number) => (
           <div key={idx} className="flex items-center justify-between gap-6">
@@ -126,9 +126,6 @@ export default function Portfolio() {
     <div className="flex-1 min-h-screen bg-background">
       <div className="relative p-6 space-y-6 overflow-hidden">
         {/* Ambient background (similar feel to reference image) */}
-        <div className="pointer-events-none absolute -top-24 -left-24 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute top-32 -right-28 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-accent/10 blur-3xl" />
 
         {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -140,7 +137,7 @@ export default function Portfolio() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur px-4 py-2">
+            <div className="rounded border border-border/50 bg-card/60  px-4 py-2">
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">AI Risk Score</p>
               <div className="mt-1 flex items-center gap-2">
                 <ShieldAlert className={cn('h-4 w-4', totals.aiRisk >= 80 ? 'text-success' : totals.aiRisk >= 65 ? 'text-warning' : 'text-destructive')} />
@@ -152,7 +149,7 @@ export default function Portfolio() {
 
         {/* Quick stats (like the chips in the reference) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border border-border/50 bg-card/60 backdrop-blur">
+          <Card className="border border-border/50 bg-card/60 ">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <Briefcase className="h-4 w-4 text-muted-foreground" />
@@ -170,7 +167,7 @@ export default function Portfolio() {
             </CardContent>
           </Card>
 
-          <Card className="border border-border/50 bg-card/60 backdrop-blur">
+          <Card className="border border-border/50 bg-card/60 ">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
@@ -189,7 +186,7 @@ export default function Portfolio() {
             </CardContent>
           </Card>
 
-          <Card className="border border-border/50 bg-card/60 backdrop-blur">
+          <Card className="border border-border/50 bg-card/60 ">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <BadgeCheck className="h-4 w-4 text-muted-foreground" />
@@ -210,7 +207,7 @@ export default function Portfolio() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
           {/* Left: chart + goals */}
           <div className="xl:col-span-8 space-y-6">
-            <Card className="border border-border/50 bg-card/60 backdrop-blur overflow-hidden">
+            <Card className="border border-border/50 bg-card/60  overflow-hidden">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold">Portfolio Growth</CardTitle>
                 <p className="text-xs text-muted-foreground">Portfolio vs benchmark + cash buffer</p>
@@ -219,9 +216,9 @@ export default function Portfolio() {
                 <ChartContainer
                   className="h-[320px] w-full"
                   config={{
-                    portfolio: { label: 'Portfolio', theme: { light: 'hsl(262 83% 58%)', dark: 'hsl(263 70% 60%)' } },
+                    portfolio: { label: 'Portfolio', theme: { light: '#7da62c', dark: '#c3ee69' } },
                     benchmark: { label: 'Benchmark', theme: { light: 'hsl(220 9% 46%)', dark: 'hsl(215 14% 50%)' } },
-                    cash: { label: 'Cash', theme: { light: 'hsl(173 80% 40%)', dark: 'hsl(172 66% 50%)' } },
+                    cash: { label: 'Cash', theme: { light: '#b07d1e', dark: '#d09a35' } },
                   }}
                 >
                   <LineChart data={mockPortfolioSeries} margin={{ left: 8, right: 8, top: 10, bottom: 0 }}>
@@ -240,13 +237,13 @@ export default function Portfolio() {
                       tickLine={false}
                       axisLine={false}
                       tickMargin={10}
-                      tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                      tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
                     />
                     <YAxis hide domain={['dataMin - 2000', 'dataMax + 2000']} />
                     <Tooltip
                       content={LineChartTooltip}
                       cursor={{
-                        stroke: 'hsl(var(--primary))',
+                        stroke: 'var(--primary)',
                         strokeWidth: 1,
                         strokeDasharray: '4 4',
                         strokeOpacity: 0.4,
@@ -260,7 +257,7 @@ export default function Portfolio() {
                       strokeWidth={2}
                       dot={false}
                       opacity={0.6}
-                      activeDot={{ r: 5, fill: 'var(--color-benchmark)', stroke: 'hsl(var(--background))', strokeWidth: 2 }}
+                      activeDot={{ r: 5, fill: 'var(--color-benchmark)', stroke: 'var(--background)', strokeWidth: 2 }}
                       animationDuration={1000}
                     />
                     <Line
@@ -271,7 +268,7 @@ export default function Portfolio() {
                       strokeWidth={2}
                       dot={false}
                       opacity={0.75}
-                      activeDot={{ r: 5, fill: 'var(--color-cash)', stroke: 'hsl(var(--background))', strokeWidth: 2 }}
+                      activeDot={{ r: 5, fill: 'var(--color-cash)', stroke: 'var(--background)', strokeWidth: 2 }}
                       animationDuration={1000}
                     />
                     <Line
@@ -284,7 +281,7 @@ export default function Portfolio() {
                       activeDot={{
                         r: 7,
                         fill: 'var(--color-portfolio)',
-                        stroke: 'hsl(var(--background))',
+                        stroke: 'var(--background)',
                         strokeWidth: 3,
                         filter: 'url(#portfolioGlow)',
                       }}
@@ -296,15 +293,15 @@ export default function Portfolio() {
                 {/* Legend */}
                 <div className="flex items-center justify-center gap-6 mt-3">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[hsl(262_83%_58%)] dark:bg-[hsl(263_70%_60%)]" />
+                    <div className="w-3 h-3 rounded-full bg-[#7da62c] dark:bg-[#c3ee69]" />
                     <span className="text-xs font-medium text-muted-foreground">Portfolio</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[hsl(220_9%_46%)] dark:bg-[hsl(215_14%_50%)]" />
+                    <div className="w-3 h-3 rounded-full bg-[#6b7265] dark:bg-[#9ea798]" />
                     <span className="text-xs font-medium text-muted-foreground">Benchmark</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[hsl(173_80%_40%)] dark:bg-[hsl(172_66%_50%)]" />
+                    <div className="w-3 h-3 rounded-full bg-[#b07d1e] dark:bg-[#d09a35]" />
                     <span className="text-xs font-medium text-muted-foreground">Cash</span>
                   </div>
                 </div>
@@ -312,7 +309,7 @@ export default function Portfolio() {
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border border-border/50 bg-card/60 backdrop-blur">
+              <Card className="border border-border/50 bg-card/60 ">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold">Goals</CardTitle>
                   <p className="text-xs text-muted-foreground">Track targets</p>
@@ -339,7 +336,7 @@ export default function Portfolio() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-border/50 bg-card/60 backdrop-blur overflow-hidden">
+              <Card className="border border-border/50 bg-card/60  overflow-hidden">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold">Other Savings</CardTitle>
                   <p className="text-xs text-muted-foreground">Auto allocations</p>
@@ -348,7 +345,7 @@ export default function Portfolio() {
                   <ChartContainer
                     className="h-[160px] w-full"
                     config={{
-                      savings: { label: 'Savings', theme: { light: 'hsl(173 80% 40%)', dark: 'hsl(172 66% 50%)' } },
+                      savings: { label: 'Savings', theme: { light: '#b07d1e', dark: '#d09a35' } },
                     }}
                   >
                     <AreaChart
@@ -368,20 +365,20 @@ export default function Portfolio() {
                         tickLine={false}
                         axisLine={false}
                         tickMargin={10}
-                        tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
+                        tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
                       />
                       <Tooltip
                         content={({ active, payload }) => {
                           if (!active || !payload?.length) return null
                           return (
-                            <div className="bg-popover/95 backdrop-blur-md border border-border/60 rounded-lg px-3 py-2 shadow-lg">
+                            <div className="bg-popover/95  border border-border/60 rounded-lg px-3 py-2 ">
                               <p className="text-xs text-muted-foreground">{payload[0]?.payload?.label}</p>
                               <p className="text-sm font-bold text-foreground">${payload[0]?.value?.toLocaleString()}</p>
                             </div>
                           )
                         }}
                         cursor={{
-                          stroke: 'hsl(173 80% 40%)',
+                          stroke: '#b07d1e',
                           strokeWidth: 1,
                           strokeDasharray: '3 3',
                           strokeOpacity: 0.5,
@@ -397,7 +394,7 @@ export default function Portfolio() {
                         activeDot={{
                           r: 5,
                           fill: 'var(--color-savings)',
-                          stroke: 'hsl(var(--background))',
+                          stroke: 'var(--background)',
                           strokeWidth: 2,
                         }}
                         animationDuration={800}
@@ -411,11 +408,11 @@ export default function Portfolio() {
 
           {/* Right: allocation + transactions */}
           <div className="xl:col-span-4 space-y-6">
-            <Card className="border border-border/50 bg-card/60 backdrop-blur overflow-hidden">
+            <Card className="border border-border/50 bg-card/60  overflow-hidden">
               <div className="p-6">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary/40 to-accent/30 border border-border/40 flex items-center justify-center">
+                    <div className="h-12 w-12 rounded bg-primary/15 border border-border/40 flex items-center justify-center">
                       <span className="text-sm font-bold text-foreground">DU</span>
                     </div>
                     <div className="min-w-0">
@@ -425,16 +422,16 @@ export default function Portfolio() {
                   </div>
 
                   <div className="flex items-center gap-1">
-                    <button type="button" className="h-9 w-9 rounded-xl border border-border/40 bg-background/40 hover:bg-muted/20 transition-colors flex items-center justify-center">
+                    <button type="button" className="h-9 w-9 rounded border border-border/40 bg-background/40 hover:bg-muted/20 transition-colors flex items-center justify-center">
                       <Bell className="h-4 w-4 text-muted-foreground" />
                     </button>
-                    <button type="button" className="h-9 w-9 rounded-xl border border-border/40 bg-background/40 hover:bg-muted/20 transition-colors flex items-center justify-center">
+                    <button type="button" className="h-9 w-9 rounded border border-border/40 bg-background/40 hover:bg-muted/20 transition-colors flex items-center justify-center">
                       <Settings className="h-4 w-4 text-muted-foreground" />
                     </button>
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-border/40 bg-gradient-to-br from-background/30 via-background/10 to-primary/10 p-4">
+                <div className="mt-5 rounded border border-border/40 bg-background/40 p-4">
                   <div className="flex items-center justify-between">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Portfolio Card</p>
                     <CreditCard className="h-4 w-4 text-muted-foreground" />
@@ -450,7 +447,7 @@ export default function Portfolio() {
               </div>
             </Card>
 
-            <Card className="border border-border/50 bg-card/60 backdrop-blur">
+            <Card className="border border-border/50 bg-card/60 ">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold">Allocation</CardTitle>
                 <p className="text-xs text-muted-foreground">By sector • Hover to explore</p>
@@ -459,9 +456,9 @@ export default function Portfolio() {
                 <ChartContainer
                   className="h-[180px] w-[180px]"
                   config={{
-                    tech: { label: 'Tech', theme: { light: 'hsl(262 83% 58%)', dark: 'hsl(263 70% 60%)' } },
-                    finance: { label: 'Finance', theme: { light: 'hsl(173 80% 40%)', dark: 'hsl(172 66% 50%)' } },
-                    auto: { label: 'Auto', theme: { light: 'hsl(0 84% 60%)', dark: 'hsl(0 72% 55%)' } },
+                    tech: { label: 'Tech', theme: { light: '#7da62c', dark: '#c3ee69' } },
+                    finance: { label: 'Finance', theme: { light: '#b07d1e', dark: '#d09a35' } },
+                    auto: { label: 'Auto', theme: { light: '#b84036', dark: '#dc9e8e' } },
                     hedge: { label: 'Hedge', theme: { light: 'hsl(220 9% 46%)', dark: 'hsl(215 14% 50%)' } },
                   }}
                 >
@@ -515,9 +512,9 @@ export default function Portfolio() {
                             className="w-2.5 h-2.5 rounded-full transition-transform"
                             style={{
                               backgroundColor:
-                                a.sector.toLowerCase() === 'tech' ? 'hsl(262 83% 58%)' :
-                                a.sector.toLowerCase() === 'finance' ? 'hsl(173 80% 40%)' :
-                                a.sector.toLowerCase() === 'auto' ? 'hsl(0 84% 60%)' : 'hsl(220 9% 46%)',
+                                a.sector.toLowerCase() === 'tech' ? '#7da62c' :
+                                a.sector.toLowerCase() === 'finance' ? '#b07d1e' :
+                                a.sector.toLowerCase() === 'auto' ? '#b84036' : 'hsl(220 9% 46%)',
                               transform: isActive ? 'scale(1.3)' : 'scale(1)',
                             }}
                           />
@@ -531,14 +528,14 @@ export default function Portfolio() {
               </CardContent>
             </Card>
 
-            <Card className="border border-border/50 bg-card/60 backdrop-blur">
+            <Card className="border border-border/50 bg-card/60 ">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold">Last Transactions</CardTitle>
                 <p className="text-xs text-muted-foreground">Mock activity</p>
               </CardHeader>
               <CardContent className="space-y-3">
                 {mockTransactions.map((t) => (
-                  <div key={t.id} className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/40 px-4 py-3">
+                  <div key={t.id} className="flex items-center justify-between gap-3 rounded border border-border/40 bg-background/40 px-4 py-3">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-foreground truncate">{t.type} {t.symbol}</p>
                       <p className="text-xs text-muted-foreground truncate">{t.timestamp}</p>
@@ -552,7 +549,7 @@ export default function Portfolio() {
         </div>
 
         {/* Holdings table */}
-        <Card className="border border-border/50 bg-card/60 backdrop-blur">
+        <Card className="border border-border/50 bg-card/60 ">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold">Holdings</CardTitle>
             <p className="text-xs text-muted-foreground">AI signal + risk derived from scans (mock)</p>
@@ -593,7 +590,7 @@ export default function Portfolio() {
                       <TableCell className={cn('text-right font-semibold', dayCls)}>{formatPct(h.dayChangePct)}</TableCell>
                       <TableCell className={cn('text-right font-semibold', totalCls)}>{formatPct(h.totalChangePct)}</TableCell>
                       <TableCell className="text-right">
-                        <span className={cn('inline-flex items-center gap-1 rounded-xl border px-2 py-1 text-xs font-semibold', riskPill)}>
+                        <span className={cn('inline-flex items-center gap-1 rounded border px-2 py-1 text-xs font-semibold', riskPill)}>
                           <SignalIcon className="h-3.5 w-3.5" />
                           {h.aiSignal} • {h.confidence}%
                         </span>
