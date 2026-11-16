@@ -2,27 +2,27 @@
 .liqui-panel {
   position: fixed; top: 0; right: 0; width: 320px; height: 100vh;
   display: flex; flex-direction: column;
-  background: linear-gradient(180deg, #0a1020 0%, #080c18 50%, #050810 100%);
+  background: linear-gradient(180deg, #20251f 0%, #1b201a 50%, #171c17 100%);
   color: #fff; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  border-left: 1px solid rgba(0, 212, 255, 0.2);
+  border-left: 1px solid rgba(195,238,105, 0.2);
   box-shadow: -20px 0 60px rgba(0, 0, 0, 0.8);
   z-index: 2147483647; padding: 16px; box-sizing: border-box;
 }
 .liqui-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-.liqui-title { font-size: 20px; font-weight: 600; background: linear-gradient(135deg, #00D4FF, #00F5D4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.liqui-subtitle { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #6b7a99; }
-.liqui-status { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 20px; background: rgba(0, 212, 255, 0.1); border: 1px solid rgba(0, 212, 255, 0.3); font-size: 11px; color: #00D4FF; }
-.liqui-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #00D4FF; box-shadow: 0 0 8px #00D4FF; animation: pulse 1.5s infinite; }
+.liqui-title { font-size: 20px; font-weight: 600; background: linear-gradient(135deg, #c3ee69, #9cc184); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.liqui-subtitle { font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #a0aa99; }
+.liqui-status { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 20px; background: rgba(195,238,105, 0.1); border: 1px solid rgba(195,238,105, 0.3); font-size: 11px; color: #c3ee69; }
+.liqui-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #c3ee69; box-shadow: 0 0 8px #c3ee69; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
 .liqui-activate-btn {
-  width: 100%; border: none; border-radius: 12px; padding: 14px 16px;
-  background: linear-gradient(135deg, #0066FF, #00D4FF);
-  box-shadow: 0 4px 20px rgba(0, 102, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.2);
+  width: 100%; border: none; border-radius: 5px; padding: 14px 16px;
+  background: linear-gradient(135deg, #7da62c, #c3ee69);
+  box-shadow: 0 4px 20px rgba(125,166,44, 0.4), 0 0 40px rgba(195,238,105, 0.2);
   color: #fff; display: flex; align-items: center; justify-content: space-between;
   cursor: pointer; margin-bottom: 14px; font-size: 12px; font-weight: 600;
 }
-.liqui-activate-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(0, 102, 255, 0.5); }
+.liqui-activate-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 25px rgba(125,166,44, 0.5); }
 .liqui-activate-left { display: flex; align-items: center; gap: 10px; }
 .liqui-activate-dot { width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.8); animation: pulseWhite 1.5s infinite; }
 @keyframes pulseWhite { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); } 50% { box-shadow: 0 0 0 8px rgba(255,255,255,0); } }
@@ -30,11 +30,11 @@
 
 .liqui-actions { display: flex; gap: 8px; margin-bottom: 12px; }
 .liqui-action-tile {
-  flex: 1; border-radius: 12px; border: 1px solid rgba(30, 50, 80, 0.6);
+  flex: 1; border-radius: 5px; border: 1px solid rgba(30, 50, 80, 0.6);
   background: linear-gradient(145deg, rgba(15, 25, 45, 0.8), rgba(10, 18, 35, 0.9));
   padding: 12px 8px; cursor: pointer; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
-.liqui-action-tile:hover { border-color: rgba(0, 212, 255, 0.5); box-shadow: 0 4px 20px rgba(0, 212, 255, 0.15); }
+.liqui-action-tile:hover { border-color: rgba(195,238,105, 0.5); box-shadow: 0 4px 20px rgba(195,238,105, 0.15); }
 .liqui-action-tile[disabled] {
   opacity: 0.55;
   cursor: not-allowed;
@@ -46,44 +46,44 @@
 }
 
 .liqui-panel.liqui-busy .liqui-status {
-  background: rgba(0, 212, 255, 0.14);
-  border-color: rgba(0, 212, 255, 0.45);
+  background: rgba(195,238,105, 0.14);
+  border-color: rgba(195,238,105, 0.45);
 }
-.liqui-action-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #00D4FF, #0088CC); }
+.liqui-action-icon { width: 32px; height: 32px; border-radius: 5px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #c3ee69, #7da62c); }
 .liqui-action-icon svg { width: 18px; height: 18px; color: #fff; }
 .liqui-action-label { font-size: 11px; font-weight: 600; }
-.liqui-action-desc { font-size: 9px; color: #6b7a99; text-align: center; }
+.liqui-action-desc { font-size: 9px; color: #a0aa99; text-align: center; }
 
 .liqui-metrics { display: flex; gap: 8px; margin-bottom: 12px; }
-.liqui-metric { flex: 1; border-radius: 10px; border: 1px solid rgba(30, 50, 80, 0.5); background: rgba(15, 25, 45, 0.6); padding: 10px 8px; text-align: center; }
-.liqui-metric-label { font-size: 9px; color: #6b7a99; letter-spacing: 0.05em; margin-bottom: 4px; }
+.liqui-metric { flex: 1; border-radius: 5px; border: 1px solid rgba(30, 50, 80, 0.5); background: rgba(15, 25, 45, 0.6); padding: 10px 8px; text-align: center; }
+.liqui-metric-label { font-size: 9px; color: #a0aa99; letter-spacing: 0.05em; margin-bottom: 4px; }
 .liqui-metric-value { font-size: 20px; font-weight: 700; }
 
 .liqui-links { display: flex; justify-content: space-between; padding: 0 4px; margin-bottom: 12px; }
-.liqui-link { font-size: 11px; color: #00D4FF; cursor: pointer; }
-.liqui-link:hover { color: #00F5D4; text-decoration: underline; }
+.liqui-link { font-size: 11px; color: #c3ee69; cursor: pointer; }
+.liqui-link:hover { color: #9cc184; text-decoration: underline; }
 
-.liqui-chat { flex: 1; display: flex; flex-direction: column; border-radius: 12px; border: 1px solid rgba(30, 50, 80, 0.5); background: rgba(10, 18, 35, 0.8); overflow: hidden; min-height: 0; }
+.liqui-chat { flex: 1; display: flex; flex-direction: column; border-radius: 5px; border: 1px solid rgba(30, 50, 80, 0.5); background: rgba(10, 18, 35, 0.8); overflow: hidden; min-height: 0; }
 .liqui-chat-header { display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid rgba(30, 50, 80, 0.5); background: rgba(15, 25, 45, 0.6); font-size: 12px; font-weight: 600; }
-.liqui-chat-badge { font-size: 10px; color: #6b7a99; font-weight: 400; }
+.liqui-chat-badge { font-size: 10px; color: #a0aa99; font-weight: 400; }
 .liqui-chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 120px; max-height: 280px; }
 .liqui-chat-messages::-webkit-scrollbar { width: 4px; }
-.liqui-chat-messages::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.3); border-radius: 2px; }
+.liqui-chat-messages::-webkit-scrollbar-thumb { background: rgba(195,238,105, 0.3); border-radius: 2px; }
 .liqui-msg { display: flex; }
 .liqui-msg-bot { justify-content: flex-start; }
 .liqui-msg-user { justify-content: flex-end; }
-.liqui-msg-content { max-width: 90%; padding: 10px 12px; border-radius: 12px; font-size: 12px; line-height: 1.5; }
-.liqui-msg-bot .liqui-msg-content { background: rgba(30, 50, 80, 0.6); color: #d0d8e8; border-bottom-left-radius: 4px; }
-.liqui-msg-user .liqui-msg-content { background: linear-gradient(135deg, #0066FF, #00D4FF); color: #fff; border-bottom-right-radius: 4px; }
+.liqui-msg-content { max-width: 90%; padding: 10px 12px; border-radius: 5px; font-size: 12px; line-height: 1.5; }
+.liqui-msg-bot .liqui-msg-content { background: rgba(30, 50, 80, 0.6); color: #eff3e9; border-bottom-left-radius: 4px; }
+.liqui-msg-user .liqui-msg-content { background: linear-gradient(135deg, #7da62c, #c3ee69); color: #fff; border-bottom-right-radius: 4px; }
 .liqui-chat-input-wrap { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(30, 50, 80, 0.5); background: rgba(15, 25, 45, 0.6); }
 #liqui-chat-input { flex: 1; border: 1px solid rgba(30, 50, 80, 0.5); border-radius: 8px; background: rgba(10, 18, 35, 0.8); color: #fff; padding: 10px 12px; font-size: 12px; outline: none; }
-#liqui-chat-input::placeholder { color: #5a6a88; }
-#liqui-chat-input:focus { border-color: rgba(0, 212, 255, 0.5); }
+#liqui-chat-input::placeholder { color: #a0aa99; }
+#liqui-chat-input:focus { border-color: rgba(195,238,105, 0.5); }
 #liqui-chat-input[disabled] {
   opacity: 0.65;
   cursor: not-allowed;
 }
-#liqui-chat-send { width: 36px; height: 36px; border: none; border-radius: 8px; background: linear-gradient(135deg, #0066FF, #00D4FF); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#liqui-chat-send { width: 36px; height: 36px; border: none; border-radius: 8px; background: linear-gradient(135deg, #7da62c, #c3ee69); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 #liqui-chat-send svg { width: 16px; height: 16px; }
 #liqui-chat-send[disabled] {
   opacity: 0.65;
@@ -91,6 +91,6 @@
 }
 
 .liqui-selection-overlay { position: fixed; top: 0; left: 0; right: 320px; bottom: 0; background: rgba(0,0,0,0.3); cursor: crosshair; z-index: 2147483646; }
-.liqui-selection-box { position: fixed; border: 2px dashed #00D4FF; background: rgba(0, 212, 255, 0.1); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
-.liqui-scan-line { position: fixed; top: 0; left: 0; right: 320px; height: 4px; background: linear-gradient(90deg, transparent, #00D4FF, transparent); box-shadow: 0 0 20px #00D4FF; z-index: 2147483645; animation: scanDown 2s ease-in-out; }
+.liqui-selection-box { position: fixed; border: 2px dashed #c3ee69; background: rgba(195,238,105, 0.1); box-shadow: 0 0 20px rgba(195,238,105, 0.3); }
+.liqui-scan-line { position: fixed; top: 0; left: 0; right: 320px; height: 4px; background: linear-gradient(90deg, transparent, #c3ee69, transparent); box-shadow: 0 0 20px #c3ee69; z-index: 2147483645; animation: scanDown 2s ease-in-out; }
 @keyframes scanDown { 0% { top: 0; opacity: 1; } 100% { top: 100vh; opacity: 0; } }
