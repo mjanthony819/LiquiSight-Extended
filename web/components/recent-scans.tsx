@@ -34,10 +34,10 @@ export default function RecentScans({ onScanClick, maxItems = 6 }: RecentScansPr
 
   return (
     <Card className="bg-card border border-border/50 overflow-hidden">
-      <div className="p-6 border-b border-border/50 bg-gradient-to-r from-accent/5 to-transparent">
+      <div className="p-6 border-b border-border/50 bg-accent/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center ring-1 ring-accent/20">
+            <div className="w-10 h-10 rounded bg-accent/10 flex items-center justify-center ring-1 ring-accent/20">
               <Sparkles className="w-5 h-5 text-accent" />
             </div>
             <div>
@@ -66,7 +66,7 @@ export default function RecentScans({ onScanClick, maxItems = 6 }: RecentScansPr
               <div className="flex items-center justify-between gap-4">
                 {/* Left: Stock Info */}
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center ring-1 ring-primary/20 flex-shrink-0">
+                  <div className="w-10 h-10 rounded bg-primary/10 flex items-center justify-center ring-1 ring-primary/20 flex-shrink-0">
                     <span className="text-xs font-bold text-primary">{scan.symbol.slice(0, 2)}</span>
                   </div>
                   <div className="min-w-0">
