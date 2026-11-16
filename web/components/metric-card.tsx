@@ -29,7 +29,7 @@ export default function MetricCard({
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">{label}</p>
             <p className="text-2xl font-bold text-card-foreground tracking-tight">{value}</p>
           </div>
-          <div className="w-11 h-11 bg-gradient-to-br from-primary/20 to-primary/10 rounded-xl flex items-center justify-center ring-1 ring-primary/20">
+          <div className="w-11 h-11 bg-gradient-to-br from-primary/20 to-primary/10 rounded flex items-center justify-center ring-1 ring-primary/20">
             <Icon className="w-5 h-5 text-primary" />
           </div>
         </div>
