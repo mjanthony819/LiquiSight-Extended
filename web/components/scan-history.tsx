@@ -70,12 +70,12 @@ export default function ScanHistory() {
         
         <div className="relative px-8 py-10">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/25">
+            <div className="w-12 h-12 rounded bg-primary flex items-center justify-center  shadow-primary/25">
               <BarChart3 className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground tracking-tight">Scan <span className="gradient-text">History</span></h1>
-              <p className="text-muted-foreground">View all AI financial scans and analyses</p>
+              <p className="text-muted-foreground">Sample analyses for UI preview - not live inference</p>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default function ScanHistory() {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Total Scans</p>
                   <p className="text-3xl font-bold text-card-foreground tracking-tight">{totalScans}</p>
                 </div>
-                <div className="w-11 h-11 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
+                <div className="w-11 h-11 rounded bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center">
                   <BarChart3 className="w-5 h-5 text-primary" />
                 </div>
               </div>
@@ -106,7 +106,7 @@ export default function ScanHistory() {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Insights Generated</p>
                   <p className="text-3xl font-bold text-card-foreground tracking-tight">{totalScans}</p>
                 </div>
-                <div className="w-11 h-11 rounded-xl bg-accent/10 ring-1 ring-accent/20 flex items-center justify-center">
+                <div className="w-11 h-11 rounded bg-accent/10 ring-1 ring-accent/20 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-accent" />
                 </div>
               </div>
@@ -120,7 +120,7 @@ export default function ScanHistory() {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Avg Confidence</p>
                   <p className="text-3xl font-bold text-card-foreground tracking-tight">{avgConfidence.toFixed(1)}%</p>
                 </div>
-                <div className="w-11 h-11 rounded-xl bg-success/10 ring-1 ring-success/20 flex items-center justify-center">
+                <div className="w-11 h-11 rounded bg-success/10 ring-1 ring-success/20 flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-success" />
                 </div>
               </div>
@@ -137,7 +137,7 @@ export default function ScanHistory() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by stock, trend, risk, or text..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-input border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded bg-input border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
             />
           </div>
           {query.trim() ? (
