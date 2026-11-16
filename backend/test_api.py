@@ -217,6 +217,43 @@ def test_analyze_chart_raises_loudly_when_providers_configured_but_all_fail(monk
     assert 0.30 <= out["confidence"] <= 0.40
 
 
+def test_analyze_with_gemini_defaults_to_a_live_model_and_honors_override(monkeypatch):
+    # gemini-1.5-flash was shut down on 2025-09-29, so the provider must default to a current
+    # model name and let GEMINI_MODEL override it.
+    import sys
+    import types
+
+    created = []
+
+    class _FakeModel:
+        def __init__(self, name):
+            created.append(name)
+
+        def generate_content(self, parts, generation_config=None):
+            return types.SimpleNamespace(
+                text='{"trend": "Uptrend", "risk": "Medium", "confidence": 0.66, "explanation": "stub"}'
+            )
+
+    fake_genai = types.ModuleType("google.generativeai")
+    fake_genai.configure = lambda api_key: None
+    fake_genai.GenerativeModel = _FakeModel
+    fake_genai.types = types.SimpleNamespace(GenerationConfig=lambda **kw: kw)
+    fake_google = types.ModuleType("google")
+    fake_google.generativeai = fake_genai
+    monkeypatch.setitem(sys.modules, "google", fake_google)
+    monkeypatch.setitem(sys.modules, "google.generativeai", fake_genai)
+
+    monkeypatch.setenv("GEMINI_API_KEY", "gm-test")
+    monkeypatch.delenv("GEMINI_MODEL", raising=False)
+    out = ca._analyze_with_gemini(_chart(), "TCS")
+    assert created == ["gemini-3.8-flash"]
+    assert out["trend"] == "Uptrend" and out["confidence"] == 0.66
+
+    monkeypatch.setenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+    ca._analyze_with_gemini(_chart(), "TCS")
+    assert created[-1] == "gemini-3.5-flash-lite"
+
+
 def test_chat_returns_openrouter_reply_when_configured(client, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "or-test")
     monkeypatch.setattr(main, "_chat_with_openrouter", lambda message, **kw: "router reply")
