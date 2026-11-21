@@ -169,11 +169,19 @@
     if (busy && statusLabel) setStatus(statusLabel);
   }
 
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
   function addBotMessage(text) {
     if (!chatMessagesEl) return;
     const msg = document.createElement("div");
     msg.className = "liqui-msg liqui-msg-bot";
-    msg.innerHTML = '<div class="liqui-msg-content">' + text.replace(/\\n/g, '<br>') + '</div>';
+    msg.innerHTML = '<div class="liqui-msg-content">' + escapeHtml(text).replace(/\\n/g, '<br>') + '</div>';
     chatMessagesEl.appendChild(msg);
     chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
   }
@@ -182,7 +190,7 @@
     if (!chatMessagesEl) return;
     const msg = document.createElement("div");
     msg.className = "liqui-msg liqui-msg-user";
-    msg.innerHTML = '<div class="liqui-msg-content">' + text + '</div>';
+    msg.innerHTML = '<div class="liqui-msg-content">' + escapeHtml(text) + '</div>';
     chatMessagesEl.appendChild(msg);
     chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
   }
