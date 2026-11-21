@@ -123,8 +123,16 @@ class LiquiSightPanel {
     this.saveChatHistory();
   }
 
+  escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   formatMessage(text) {
-    return text
+    return this.escapeHtml(text)
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`(.*?)`/g, '<code>$1</code>')
@@ -218,7 +226,7 @@ class LiquiSightPanel {
       this.hideTypingIndicator();
       this.addMessage('assistant', `
         <div class="error-message">
-          <strong>⚠️ Error:</strong> ${error.message}<br><br>
+          <strong>⚠️ Error:</strong> ${this.escapeHtml(error.message)}<br><br>
           <small>Please check that the backend is running on http://127.0.0.1:8000 and that OPENROUTER_API_KEY is set in the root .env.</small>
         </div>
       `, true);
